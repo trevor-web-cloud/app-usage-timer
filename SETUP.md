@@ -38,7 +38,7 @@
 
 1. 到本專案的 Releases 頁下載最新版 APK：
    https://github.com/trevor-web-cloud/tvtimer/releases
-   （檔名類似 `tvtimer-v9.apk`）
+   （檔名類似 `tvtimer-v10.apk`）
 2. 下載 Google 官方的 platform-tools（裡面有 `adb.exe`）：
    https://developer.android.com/tools/releases/platform-tools
    選 Windows 版，解壓縮到一個固定位置，例如 `D:\platform-tools`。
@@ -72,7 +72,7 @@
 
 1. 安裝（還連著線的 PowerShell）：
    ```powershell
-   .\adb install -r tvtimer-v9.apk
+   .\adb install -r tvtimer-v10.apk
    ```
    看到 `Success` 完成。此時電視的應用程式清單會出現「看電視計時」（碼表圖示）。
 2. 在電腦用記事本建立 `token.txt`：內容**只有 token 一行**，不要加空白、引號或其他文字，存到 `D:\platform-tools`。
@@ -197,7 +197,7 @@ First-time setup takes about 20–30 minutes.
 ## Step 3 — Download the APK and ADB tools (on your PC)
 
 1. Download the latest APK from this project's Releases page:
-   https://github.com/trevor-web-cloud/tvtimer/releases (file name like `tvtimer-v9.apk`)
+   https://github.com/trevor-web-cloud/tvtimer/releases (file name like `tvtimer-v10.apk`)
 2. Download Google's official platform-tools (contains `adb.exe`):
    https://developer.android.com/tools/releases/platform-tools
    Get the Windows version and unzip it to a fixed place, e.g. `D:\platform-tools`.
@@ -235,7 +235,7 @@ First-time setup takes about 20–30 minutes.
 
 1. Install (same PowerShell):
    ```powershell
-   .\adb install -r tvtimer-v9.apk
+   .\adb install -r tvtimer-v10.apk
    ```
    `Success` means installed. "TV Timer" (stopwatch icon) now appears in the TV's app list.
 2. Create `token.txt` in Notepad: the **token only, one line**, no spaces or quotes.
