@@ -298,9 +298,78 @@ public class MainActivity extends Activity {
         });
         settingsBox.addView(langBtn, Ui.rowParams(this));
 
+        // --- CAP-CUSTOM（v10）：每日上限自訂（預設 120 分） ---
+        Button capBtn = Ui.bigButton(this, capButtonText());
+        capBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCapDialog();
+            }
+        });
+        settingsBox.addView(capBtn, Ui.rowParams(this));
+
         setContentView(scroll);
         applyUnlockState();
         refreshStatus();
+    }
+
+    /** CAP-CUSTOM（v10）：每日上限按鈕文字（顯示目前值）。 */
+    private String capButtonText() {
+        return L.t(this, "每日上限：", "Daily limit: ") + Prefs.getDailyCapMin(this)
+                + L.t(this, " 分鐘（點擊更改）", " min (tap to change)");
+    }
+
+    /** CAP-CUSTOM（v10）：每日上限選擇（預設值清單＋自訂）。 */
+    private void showCapDialog() {
+        final int[] presets = {60, 90, 120, 150, 180, 240};
+        String[] items = new String[presets.length + 1];
+        for (int i = 0; i < presets.length; i++) {
+            items[i] = presets[i] + L.t(this, " 分鐘", " min");
+        }
+        items[presets.length] = L.t(this, "自訂…", "Custom…");
+        new AlertDialog.Builder(this)
+                .setTitle(L.t(this, "每日上限", "Daily limit"))
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        if (which < presets.length) {
+                            Prefs.setDailyCapMin(MainActivity.this, presets[which]);
+                            recreate();
+                        } else {
+                            showCapCustomDialog();
+                        }
+                    }
+                })
+                .show();
+    }
+
+    /** CAP-CUSTOM（v10）：自訂每日上限（數字輸入，Prefs 端夾限 10–600）。 */
+    private void showCapCustomDialog() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setText(String.valueOf(Prefs.getDailyCapMin(this)));
+        input.setTextSize(20);
+        input.setTextColor(Ui.COLOR_TEXT);
+        input.setBackgroundColor(Ui.COLOR_PANEL);
+        input.setPadding(Ui.dp(this, 16), Ui.dp(this, 10), Ui.dp(this, 16), Ui.dp(this, 10));
+        input.setSingleLine(true);
+        new AlertDialog.Builder(this)
+                .setTitle(L.t(this, "自訂每日上限（10–600 分鐘）", "Custom daily limit (10–600 min)"))
+                .setView(input)
+                .setPositiveButton(L.t(this, "確定", "OK"), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        try {
+                            Prefs.setDailyCapMin(MainActivity.this,
+                                    Integer.parseInt(input.getText().toString().trim()));
+                        } catch (NumberFormatException ignored) {
+                            // 輸入無效時不更改
+                        }
+                        recreate();
+                    }
+                })
+                .setNegativeButton(L.t(this, "取消", "Cancel"), null)
+                .show();
     }
 
     private EditText pinEditText(String hint) {
@@ -540,7 +609,7 @@ public class MainActivity extends Activity {
             }
             TimerEngine.Snapshot s = WatchdogService.liveSnapshot();
             if (s != null) {
-                sb.append(L.t(this, "今日累計：", "Today: ")).append(Math.round(s.todayMs / 60000.0)).append(L.t(this, " 分鐘\n", " min\n"));
+                sb.append(L.t(this, "今日累計：", "Today: ")).append(Math.round(s.todayMs / 60000.0)).append(L.t(this, " 分鐘（上限 ", " min (limit ")).append(Prefs.getDailyCapMin(this)).append(L.t(this, " 分鐘）\n", " min)\n"));
                 if (s.parentMode) {
                     sb.append(L.t(this, "目前狀態：家長模式", "Status: parent mode"));
                 } else if (s.sessionActive) {
@@ -556,7 +625,7 @@ public class MainActivity extends Activity {
                 }
             } else {
                 long todayMs = Prefs.getTodayMs(this);
-                sb.append(L.t(this, "今日累計：", "Today: ")).append(Math.round(todayMs / 60000.0)).append(L.t(this, " 分鐘\n", " min\n"));
+                sb.append(L.t(this, "今日累計：", "Today: ")).append(Math.round(todayMs / 60000.0)).append(L.t(this, " 分鐘（上限 ", " min (limit ")).append(Prefs.getDailyCapMin(this)).append(L.t(this, " 分鐘）\n", " min)\n"));
                 sb.append(L.t(this, "目前狀態：看門狗服務未運行（開啟 App 後會自動啟動）", "Status: watchdog service not running (it starts automatically when the app opens)"));
             }
         }

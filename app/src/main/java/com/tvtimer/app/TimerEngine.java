@@ -33,7 +33,10 @@ public class TimerEngine {
     public static final int PIN_LOCKED = 2;       // 連續錯誤過多，鎖定中（SEC-03）
     public static final int PIN_MUST_CHANGE = 3;  // 驗證成功但仍是預設 PIN，須先設定新 PIN（SEC-02）
 
-    public static final long DAILY_CAP_MS = 120L * 60_000L;
+    /** CAP-CUSTOM（v10）：每日上限改讀 Prefs（預設 120 分，家長可在設定頁自訂 10–600 分）。 */
+    public long dailyCapMs() {
+        return Prefs.getDailyCapMin(ctx) * 60_000L;
+    }
     /** 核准請求 pending 的有效期限，逾時自動失效（SEC-04）。 */
     private static final long PENDING_TTL_MS = 30L * 60_000L;
     private static final long PARENT_MODE_MS = 2L * 60 * 60_000L;
@@ -216,7 +219,7 @@ public class TimerEngine {
     }
 
     public boolean capReached() {
-        return todayMs >= DAILY_CAP_MS;
+        return todayMs >= dailyCapMs();
     }
 
     public void setGateShowing(boolean showing) {
@@ -441,7 +444,7 @@ public class TimerEngine {
                     // CAP-1（v7）：今日累計在本 tick 跨越每日上限 → 硬停結束時段。
                     // 以「跨越」觸發：開局時已達上限（家長核准的超額時段）不誤殺；
                     // 不限制時段豁免（使用者 2026-10-31 裁示）。
-                    if (!sessionUnlimited && prevTodayMs < DAILY_CAP_MS && todayMs >= DAILY_CAP_MS) {
+                    if (!sessionUnlimited && prevTodayMs < dailyCapMs() && todayMs >= dailyCapMs()) {
                         capNotified = true;
                         Prefs.setCapNotifiedDate(ctx, todayDate);
                         persistSession();

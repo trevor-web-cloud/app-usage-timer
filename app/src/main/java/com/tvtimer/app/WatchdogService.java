@@ -540,7 +540,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
         if (chatId == 0 || telegram == null) {
             return;
         }
-        telegram.sendTextAsync(chatId, L.t(this, "📢 今日已達上限 120 分鐘，之後開局需要爸媽核准。", "📢 Today's 120-minute limit is reached. New sessions now need a parent's approval."));
+        telegram.sendTextAsync(chatId, L.t(this, "📢 今日已達上限 " + Prefs.getDailyCapMin(this) + " 分鐘，之後開局需要爸媽核准。", "📢 Today's " + Prefs.getDailyCapMin(this) + "-minute limit is reached. New sessions now need a parent's approval."));
     }
 
     @Override
@@ -575,7 +575,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
                         + Math.round(s.todayMs / 60000.0) + L.t(this, " 分鐘）", " min)");
                 break;
             case TimerEngine.REQ_NEW_SESSION:
-                text = L.t(this, "🙋 小孩請求開局 ", "🙋 Your child is asking to start a ") + minutes + L.t(this, " 分鐘（今日已達上限 120 分鐘，需核准）。", " min session (today's 120-minute limit reached — approval needed).");
+                text = L.t(this, "🙋 小孩請求開局 ", "🙋 Your child is asking to start a ") + minutes + L.t(this, " 分鐘（今日已達上限 ", " min session (today's ") + Prefs.getDailyCapMin(this) + L.t(this, " 分鐘，需核准）。", "-minute limit reached — approval needed).");
                 break;
             case TimerEngine.REQ_UNLIMITED:
                 text = L.t(this, "🙋 小孩請求不限制模式。", "🙋 Your child is asking for unlimited mode.");

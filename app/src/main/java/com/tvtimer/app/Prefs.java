@@ -52,6 +52,11 @@ public final class Prefs {
     /** v6：介面語言，"zh"（預設）或 "en"。 */
     private static final String K_LANG = "app_lang";
     private static final String K_CAP_NOTIFIED_DATE = "cap_notified_date";
+    /** CAP-CUSTOM（v10）：每日上限（分鐘），家長可自訂。 */
+    private static final String K_DAILY_CAP_MIN = "daily_cap_min";
+    public static final int DAILY_CAP_DEFAULT_MIN = 120;
+    public static final int DAILY_CAP_FLOOR_MIN = 10;
+    public static final int DAILY_CAP_CEIL_MIN = 600;
     private static final String K_PARENT_DEADLINE_WALL = "parent_deadline_wall";
     private static final String K_REQ_SEQ = "req_seq";
     private static final String K_PEND_ID = "pend_id";
@@ -493,6 +498,17 @@ public final class Prefs {
 
     public static void setCapNotifiedDate(Context c, String v) {
         sp(c).edit().putString(K_CAP_NOTIFIED_DATE, v).apply();
+    }
+
+    /** CAP-CUSTOM（v10）：每日上限（分鐘）；未設定時為預設 120，讀寫皆夾限 10–600。 */
+    public static int getDailyCapMin(Context c) {
+        int v = sp(c).getInt(K_DAILY_CAP_MIN, DAILY_CAP_DEFAULT_MIN);
+        return Math.max(DAILY_CAP_FLOOR_MIN, Math.min(DAILY_CAP_CEIL_MIN, v));
+    }
+
+    public static void setDailyCapMin(Context c, int v) {
+        int clamped = Math.max(DAILY_CAP_FLOOR_MIN, Math.min(DAILY_CAP_CEIL_MIN, v));
+        sp(c).edit().putInt(K_DAILY_CAP_MIN, clamped).apply();
     }
 
     // ---- parent mode ----

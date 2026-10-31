@@ -402,7 +402,7 @@ public class GateController {
             addSub(L.t(ctx, "要看多久？", "How long do you want to watch?"));
         }
         if (s.capReached && !s.sessionActive) {
-            addNote(L.t(ctx, "今天已達上限 120 分鐘，開局需要爸媽核准。", "Today's 120-minute limit is reached. A parent must approve a new session."));
+            addNote(L.t(ctx, "今天已達上限 " + Prefs.getDailyCapMin(ctx) + " 分鐘，開局需要爸媽核准。", "Today's " + Prefs.getDailyCapMin(ctx) + "-minute limit is reached. A parent must approve a new session."));
         }
         LinearLayout row = hRow();
         first = addDurationButton(row, L.t(ctx, "30 分鐘", "30 min"), 30, first);

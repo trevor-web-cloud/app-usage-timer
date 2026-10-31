@@ -12,7 +12,7 @@
 
 ## 功能
 
-- **計時規則**：單次 30／45／60 分鐘或自訂（5–180 分）；每日上限 120 分鐘，看滿即硬停；午夜 12 點自動結清當日時段
+- **計時規則**：單次 30／45／60 分鐘或自訂（5–180 分）；每日上限可自訂（預設 120 分鐘），看滿即硬停；午夜 12 點自動結清當日時段
 - **看門狗監看**：無障礙服務＋UsageStats 雙訊號判定前台 App，離開觀看 App 自動暫停、回來可續看剩餘時間
 - **攔截**：沒有時段就開觀看 App → 全屏攔截頁，可直接開局或請爸媽核准；剩 1 分鐘跳警告、時間到自動回主畫面鎖定
 - **系統封鎖**：小孩狀態下「設定」與 Play 商店被強制鎖定（週期性重申驅離，防搶回前台繞過），避免改設定或移除本 App
@@ -68,7 +68,7 @@ approvals from their phones through their own Telegram bot.
 
 ## Features
 
-- **Timing rules**: 30/45/60-minute sessions or custom (5–180 min); a hard daily cap of 120 minutes; any running session is closed out at midnight
+- **Timing rules**: 30/45/60-minute sessions or custom (5–180 min); a customizable daily cap (default 120 minutes), enforced as a hard stop; any running session is closed out at midnight
 - **Watchdog monitoring**: Accessibility events + UsageStats jointly track the foreground app; leaving a viewing app auto-pauses, and the remaining time can be resumed later
 - **Gating**: opening a viewing app with no active session shows a full-screen gate — start a session, or ask a parent to approve; 1-minute warning, then auto-lock at time-up
 - **System lockdown**: in kid mode, Settings and the Play Store are force-locked (re-asserted periodically so they can't be kept in front), preventing tampering or uninstalling this app
