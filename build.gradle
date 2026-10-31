@@ -1,0 +1,3 @@
+// Root build file. The Android application plugin (with its version) is declared
+// in app/build.gradle and resolved through pluginManagement in settings.gradle.
+// This project intentionally has NO library dependencies: framework APIs only.

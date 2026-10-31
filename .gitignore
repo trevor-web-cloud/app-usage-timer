@@ -1,0 +1,12 @@
+# Local build / machine files — never commit
+local.properties
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# Secrets — the bot token is imported on-device at runtime and must never live in this repo
+token.txt
+*.keystore
+*.jks

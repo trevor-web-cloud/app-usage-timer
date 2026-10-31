@@ -1,0 +1,39 @@
+plugins {
+    id 'com.android.application' version '8.5.2'
+}
+
+android {
+    namespace 'com.tvtimer.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.tvtimer.app'
+        minSdk 30
+        targetSdk 34
+        versionCode 8
+        versionName '1.7-v9'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // 側載安裝用：以內建 debug key 簽署，免自備 keystore 即可 adb install（SEC-10）
+            signingConfig signingConfigs.debug
+        }
+        debug {
+            minifyEnabled false
+            // 正式交付一律非 debuggable：避免 ADB run-as 直讀含 token／PIN 的私有資料（SEC-10）
+            debuggable false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Intentionally empty: the app uses Android framework APIs only
+// (no AndroidX, no third-party libraries).
+dependencies {
+}

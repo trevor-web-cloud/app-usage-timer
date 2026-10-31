@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">看電視計時</string>
+    <string name="accessibility_service_label">看電視計時監看</string>
+    <string name="accessibility_service_description">監看目前使用的 App，以執行看電視計時與家長核准規則。</string>
+</resources>

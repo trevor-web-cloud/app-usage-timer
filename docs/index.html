@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Timer 看電視計時 — Chromecast with Google TV 兒童計時看門狗</title>
+<meta name="description" content="為 Chromecast with Google TV 4K 自製的兒童看電視計時系統：背景看門狗監看觀看 App，家長以 Telegram 遠端核准與加時。A parental screen-time watchdog for Chromecast with Google TV, with Telegram approvals.">
+<link rel="icon" href="assets/icon.png">
+<style>
+  :root { --bg:#0b1e3a; --panel:#123058; --line:#2b4a7a; --text:#eef3fb; --muted:#a9bedd; --accent:#ffb300; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.65; }
+  header { text-align:center; padding:28px 16px 8px; }
+  header img.banner { max-width:880px; width:100%; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.45); }
+  .langbar { display:flex; gap:8px; justify-content:center; margin:18px 0 4px; }
+  .langbar button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:6px 20px; font-size:15px; cursor:pointer; }
+  .langbar button.on { background:var(--accent); color:#231a00; border-color:var(--accent); font-weight:700; }
+  main { max-width:880px; margin:0 auto; padding:8px 18px 40px; }
+  h1 { font-size:30px; margin:10px 0 4px; text-align:center; }
+  .sub { text-align:center; color:var(--muted); margin:0 0 22px; }
+  h2 { font-size:21px; margin:30px 0 10px; border-left:5px solid var(--accent); padding-left:10px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .card b { color:var(--accent); display:block; margin-bottom:4px; font-size:16px; }
+  ul { margin:6px 0 6px 18px; padding:0; }
+  li { margin:5px 0; }
+  code { background:#0a1730; border:1px solid var(--line); border-radius:6px; padding:1px 6px; font-size:90%; }
+  .note { background:#12294d; border:1px dashed var(--line); border-radius:12px; padding:12px 16px; color:var(--muted); }
+  footer { text-align:center; color:var(--muted); padding:22px 12px 34px; font-size:14px; }
+  a { color:var(--accent); }
+  [data-en] { display:none; }
+  html.en [data-en] { display:block; }
+  html.en [data-zh] { display:none; }
+  span[data-en], span[data-zh] { display:inline; }
+  html.en span[data-zh] { display:none; }
+  html.en span[data-en] { display:inline; }
+</style>
+</head>
+<body>
+<header>
+  <img class="banner" src="assets/banner.png" alt="TV Timer">
+  <div class="langbar">
+    <button id="btnZh" class="on" onclick="setLang('zh')">繁體中文</button>
+    <button id="btnEn" onclick="setLang('en')">English</button>
+  </div>
+  <h1><span data-zh>看電視計時 TV Timer</span><span data-en>TV Timer</span></h1>
+  <p class="sub">
+    <span data-zh>Chromecast with Google TV 4K 兒童計時系統 · 背景看門狗 ＋ Telegram 家長核准 · 目前版本 v9</span>
+    <span data-en>A screen-time system for kids on Chromecast with Google TV 4K · watchdog + Telegram parent approvals · current version v9</span>
+  </p>
+  <div class="langbar">
+    <a href="https://github.com/trevor-web-cloud/tvtimer/releases"><button>📥 <span data-zh>下載 APK</span><span data-en>Download APK</span></button></a>
+    <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md"><button>📖 <span data-zh>詳細安裝教學</span><span data-en>Setup guide</span></button></a>
+  </div>
+</header>
+<main>
+  <h2><span data-zh>功能</span><span data-en>Features</span></h2>
+  <div class="cards">
+    <div class="card"><b><span data-zh>計時規則</span><span data-en>Timing rules</span></b>
+      <span data-zh>單次 30／45／60 分或自訂（5–180 分）；每日上限 120 分看滿硬停；午夜自動結清。</span>
+      <span data-en>30/45/60-minute sessions or custom (5–180 min); hard daily cap of 120 minutes; sessions close out at midnight.</span></div>
+    <div class="card"><b><span data-zh>看門狗監看</span><span data-en>Watchdog</span></b>
+      <span data-zh>無障礙＋UsageStats 雙訊號盯前台；離開自動暫停、回來續看剩餘時間。</span>
+      <span data-en>Accessibility + UsageStats track the foreground app; leaving auto-pauses, remaining time resumes later.</span></div>
+    <div class="card"><b><span data-zh>系統強制鎖定</span><span data-en>System lockdown</span></b>
+      <span data-zh>小孩狀態下設定與 Play 商店被強制鎖定並週期重申，防止改設定或移除本 App。</span>
+      <span data-en>In kid mode, Settings and the Play Store are force-locked and re-asserted, blocking tampering or uninstall.</span></div>
+    <div class="card"><b><span data-zh>Telegram 核准</span><span data-en>Telegram approvals</span></b>
+      <span data-zh>專用 bot 回報開始／結束；爸媽在群組一鍵核准、遠端 +15／+30 分或立即結束。</span>
+      <span data-en>A dedicated bot reports start/end; either parent approves in a group chat, adds +15/+30 min, or ends the session.</span></div>
+    <div class="card"><b><span data-zh>家長模式</span><span data-en>Parent mode</span></b>
+      <span data-zh>PIN 或 Telegram 核准進入，2 小時或待機自動結束，期間看門狗休眠。</span>
+      <span data-en>Enter by PIN or Telegram approval; ends after 2 hours or on standby; the watchdog sleeps meanwhile.</span></div>
+    <div class="card"><b><span data-zh>清單自訂＋雙語</span><span data-en>Custom list + bilingual</span></b>
+      <span data-zh>觀看清單可增減任意已安裝 App；介面繁體中文／English 可切換。</span>
+      <span data-en>Add or remove any installed app on the watch list; UI switches between Traditional Chinese and English.</span></div>
+  </div>
+
+  <h2><span data-zh>運作方式</span><span data-en>How it works</span></h2>
+  <ul>
+    <li><span data-zh>純 Android framework API、零第三方函式庫；前台服務常駐，狀態全部持久化，重開機自動還原（今日累計具 NTP 校時防護）。</span>
+        <span data-en>Pure Android framework APIs, zero third-party libraries; a foreground service keeps watch, all state persists and restores across reboots (daily total hardened against NTP sync delay).</span></li>
+    <li><span data-zh>Bot token 不寫在程式碼裡：家長在 PC 產生 token 檔，經 ADB 推入裝置，App 匯入私有儲存後刪除原檔。</span>
+        <span data-en>The bot token is never in the source: a parent pushes a token file via ADB; the app imports it into private storage and deletes the file.</span></li>
+    <li><span data-zh>沒有時段就開觀看 App 會被全屏攔截，可直接開局或送出核准請求；剩 1 分鐘警告、到時回主畫面鎖定。</span>
+        <span data-en>Opening a viewing app with no session shows a full-screen gate — start a session or request approval; 1-minute warning, then auto-lock at time-up.</span></li>
+  </ul>
+
+  <h2><span data-zh>建置與安裝</span><span data-en>Build &amp; install</span></h2>
+  <ul>
+    <li><span data-zh>一般使用者免編譯：到 <a href="https://github.com/trevor-web-cloud/tvtimer/releases">Releases</a> 下載最新版 APK，再照 <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md">詳細安裝教學</a> 逐步完成（建機器人、取 token、傳入、權限、配對、疑難排解）。</span>
+        <span data-en>End users: no build needed — download the latest APK from <a href="https://github.com/trevor-web-cloud/tvtimer/releases">Releases</a> and follow the <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md">detailed setup guide</a> (bot, token, import, permissions, pairing, troubleshooting).</span></li>
+    <li><span data-zh>以 ADB 側載至 Chromecast with Google TV 4K（Android TV OS 14 實測），授予懸浮窗、無障礙、使用情況存取三項權限，並完成 token 匯入、bot 配對與 PIN 設定。</span>
+        <span data-en>Sideload via ADB onto a Chromecast with Google TV 4K (tested on Android TV OS 14); grant overlay, accessibility and usage-access permissions, import the token, pair your bot and set a PIN.</span></li>
+    <li><span data-zh>開發者從原始碼建置：JDK 21 ＋ Gradle 8.9 ＋ Android SDK 34，執行 <code>gradle assembleRelease</code>。</span>
+        <span data-en>Developers building from source: JDK 21 + Gradle 8.9 + Android SDK 34, run <code>gradle assembleRelease</code>.</span></li>
+  </ul>
+
+  <h2><span data-zh>已知限制（誠實揭露）</span><span data-en>Known limitations</span></h2>
+  <div class="note">
+    <ul>
+      <li><span data-zh>手機投放（Cast）不計時。</span><span data-en>Casting from a phone is not timed.</span></li>
+      <li><span data-zh>看門狗程序若被系統終止，採 fail-open（短暫空窗），非常駐 root 等級強制方案。</span>
+          <span data-en>If the system kills the watchdog it fails open (a brief gap); this is not a root-level enforcer.</span></li>
+      <li><span data-zh>僅針對 Android TV／Google TV 設計；保留原廠首頁與投放。</span>
+          <span data-en>Designed for Android TV / Google TV only; keeps the stock home screen and casting.</span></li>
+    </ul>
+  </div>
+</main>
+<footer>
+  <span data-zh>原始碼與變更紀錄：</span><span data-en>Source &amp; changelog: </span>
+  <a href="https://github.com/trevor-web-cloud/tvtimer">github.com/trevor-web-cloud/tvtimer</a>
+</footer>
+<script>
+function setLang(l){
+  document.documentElement.classList.toggle('en', l==='en');
+  document.documentElement.lang = l==='en' ? 'en' : 'zh-Hant';
+  document.getElementById('btnZh').classList.toggle('on', l!=='en');
+  document.getElementById('btnEn').classList.toggle('on', l==='en');
+  try{ localStorage.setItem('tvtimerLang', l); }catch(e){}
+}
+try{ if(localStorage.getItem('tvtimerLang')==='en') setLang('en'); }catch(e){}
+</script>
+</body>
+</html>

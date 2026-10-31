@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TV Timer</string>
+    <string name="accessibility_service_label">TV Timer Watchdog</string>
+    <string name="accessibility_service_description">Watches the app currently in use to enforce TV time limits and parent approval rules.</string>
+</resources>
