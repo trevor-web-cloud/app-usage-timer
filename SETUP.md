@@ -145,6 +145,22 @@
 - APK 只從本專案的 Releases 頁下載，來路不明的 APK 不要裝。
 - PIN 不要用生日或連號。
 
+## 移除 App
+
+不再使用時可完整移除。本 App 不使用裝置管理員權限，不需先解除任何設定；移除後，App 內的 token、PIN 與設定會一併刪除。
+
+**方法一：在電視上移除**
+
+1. 開 TV Timer，先進**家長模式**（輸入 PIN，或在 Telegram 群組核准）。這一步不能省：小孩模式下設定被 App 擋住，是設計行為。
+2. 回主畫面 → **設定 → 應用程式 → TV Timer → 解除安裝**。
+
+**方法二：用電腦 ADB 移除**（不需進家長模式）
+
+```
+.\adb connect <電視IP>:<無線偵錯主頁的埠號>
+.\adb uninstall com.tvtimer.app
+```
+
 ---
 
 # TV Timer — Detailed Setup Guide (English)
@@ -297,3 +313,19 @@ All three should show ✓.
 - The token is your bot's password: keep it only on your PC and TV. Never online, never shared.
 - Download the APK only from this project's Releases page.
 - Don't use a birthday or a repeating sequence as the PIN.
+
+## Uninstalling the app
+
+You can remove the app completely at any time. It does not use device-admin rights, so there is nothing to deactivate first; uninstalling also deletes the token, PIN, and settings stored in the app.
+
+**Option 1 — On the TV**
+
+1. Open TV Timer and enter **Parent Mode** first (PIN, or approval in the Telegram group). This step is required: in child state the app blocks Settings by design.
+2. Go back to the home screen → **Settings → Apps → TV Timer → Uninstall**.
+
+**Option 2 — From your PC with ADB** (no Parent Mode needed)
+
+```
+.\adb connect <TV_IP>:<port shown on the Wireless debugging main page>
+.\adb uninstall com.tvtimer.app
+```
