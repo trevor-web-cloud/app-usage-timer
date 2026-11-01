@@ -5,7 +5,7 @@
 
 **目前版本：v14（versionCode 16 / 1.12-v14，修訂版三）** ｜ 專案網頁：https://trevor-web-cloud.github.io/app-usage-timer/
 
-📥 **直接下載 APK 安裝**：[Releases 頁](https://github.com/trevor-web-cloud/app-usage-timer/releases)（不需自行編譯）
+📥 **直接下載 APK 安裝**：[Releases 頁](https://github.com/trevor-web-cloud/app-usage-timer/releases)（不需自行編譯）；電視上用 Downloader 直達目前 v14 APK 的短網址：https://bit.ly/4yZrB8b（遙控器好打）
 📖 **詳細安裝教學**（建機器人、取得 token、配對、權限、疑難排解）：[SETUP.md](SETUP.md)
 
 > English version below.
@@ -52,7 +52,7 @@ ADB 無線連線、傳入 token、授予懸浮窗／無障礙／使用情況存�
 
 ## 變更紀錄
 
-各版修正與驗證過程見 repo 內的 `修正紀錄-v*.md`、`計時修正紀錄-v*.md`、`資安修正紀錄-v2.md`。
+各版修正與驗證過程見 repo 內的 `修正紀錄.md`（v2–v14 彙整）。
 
 ---
 
@@ -64,7 +64,7 @@ approvals from their phones through their own Telegram bot.
 
 **Current version: v14 (versionCode 16 / 1.12-v14, revision 3)** ｜ Project page: https://trevor-web-cloud.github.io/app-usage-timer/
 
-📥 **Download the ready-made APK**: [Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) (no build needed)
+📥 **Download the ready-made APK**: [Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) (no build needed); on the TV, Downloader short URL for the current v14 APK: https://bit.ly/4yZrB8b (easy to type with a remote)
 📖 **Detailed setup guide** (bot creation, token, pairing, permissions, troubleshooting): [SETUP.md](SETUP.md)
 
 ## Features
@@ -113,5 +113,5 @@ usage-access permissions, set a PIN, and pair the parents' group
 
 ## Changelog
 
-Per-version fixes and verification notes (in Chinese) live in this repo as
-`修正紀錄-v*.md`, `計時修正紀錄-v*.md` and `資安修正紀錄-v2.md`.
+Per-version fixes and verification notes (in Chinese) are consolidated in
+`修正紀錄.md` (v2–v14) in this repo.
