@@ -3,6 +3,8 @@ package com.tvtimer.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AppOpsManager;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
     private Button permUsageBtn;
     private Button permOverlayBtn;
     private Button permBatteryBtn;
+    private Button devBtn;
     private LinearLayout settingsBox;
     /** WL-1：觀看清單專用容器（自訂 App 增刪後可單獨重建，不必重開畫面）。 */
     private LinearLayout watchBox;
@@ -487,7 +490,7 @@ public class MainActivity extends Activity {
 
         // --- WEB-1（v14）：用手機設定 token（電視遙控器打 45 字元不切實際；
         // 改開一次性區網頁面讓家長用手機貼上，成功/逾時/取消即關閉） ---
-        Button webToken = Ui.bigButton(this, L.t(this, "用手機設定 Token（電視推薦）", "Set token from phone (recommended for TV)"));
+        Button webToken = Ui.bigButton(this, L.t(this, "用手機設定 Token", "Set token from phone"));
         webToken.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -517,12 +520,41 @@ public class MainActivity extends Activity {
         });
         settingsBox.addView(capBtn, Ui.rowParams(this));
 
+        // --- DEV-1（v14 修訂）：開發人員選項捷徑（狀態即時顯示；未開啟時跳「關於」頁
+        // 讓家長手點版本號 7 次——OS 未開放 API 讓一般 App 代按或直接打開此開關） ---
+        devBtn = Ui.bigButton(this, "");
+        devBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDeveloperOptions();
+            }
+        });
+        settingsBox.addView(devBtn, Ui.rowParams(this));
+
+        // --- GRP-2（v14 修訂）：步驟一再依裝置型態分子群組，本機適用組排第一並標示，
+        // 避免電視用／平板用的 token 方法混在同一組造成混淆 ---
+        boolean tv = isTvDevice();
+        LinearLayout subTv;
+        LinearLayout subPad;
+        LinearLayout subShared;
+        if (tv) {
+            subTv = tokenSubGroup(grpToken, "電視用（此裝置）", "For TV (this device)");
+            subPad = tokenSubGroup(grpToken, "平板用", "For tablet");
+            subShared = tokenSubGroup(grpToken, "共用", "Shared");
+        } else {
+            subPad = tokenSubGroup(grpToken, "平板用（此裝置）", "For tablet (this device)");
+            subTv = tokenSubGroup(grpToken, "電視用", "For TV");
+            subShared = tokenSubGroup(grpToken, "共用", "Shared");
+        }
+        moveToGroup(subTv, webToken);
+        moveToGroup(subPad, pasteToken, fileAccess);
+        moveToGroup(subShared, rereadToken, clearToken);
+
         // --- GRP-1（v13）：把設定項移入群組（建構順序不動，只改歸屬與顯示順序） ---
-        moveToGroup(grpToken, webToken, fileAccess, pasteToken, rereadToken, clearToken);
         moveToGroup(grpPair, clearPairing);
         moveToGroup(grpWatch, watchBox);
         moveToGroup(grpParent, parentRow);
-        moveToGroup(grpOther, capBtn, langBtn, newPinRow);
+        moveToGroup(grpOther, capBtn, langBtn, newPinRow, devBtn);
 
         setContentView(scroll);
         applyUnlockState();
@@ -863,6 +895,12 @@ public class MainActivity extends Activity {
             permOverlayBtn.setText(L.t(this, "4. 懸浮窗 ", "4. Overlay ") + (hasOverlay ? "✓" : "✗"));
             permBatteryBtn.setText(L.t(this, "5. 省電策略 ", "5. Battery policy ") + (isBatteryUnrestricted() ? "✓" : "✗"));
         }
+        // DEV-1：開發人員選項狀態同步（按鈕在「其他設定」群組）
+        if (devBtn != null) {
+            devBtn.setText(L.t(this, "開發人員選項 ", "Developer options ")
+                    + (isDeveloperModeOn() ? "✓" : "✗")
+                    + L.t(this, "（點擊前往）", " (tap to open)"));
+        }
 
         // 待確認配對區塊（SEC-01）：未綁定且有未過期的配對請求時才顯示
         if (pairingBox != null) {
@@ -901,6 +939,60 @@ public class MainActivity extends Activity {
                 ((LinearLayout) v.getParent()).removeView(v);
             }
             group.addView(v, Ui.rowParams(this));
+        }
+    }
+
+    /** GRP-2（v14 修訂）：在既有群組內建子群組（較小的標題），回傳容器。 */
+    private LinearLayout tokenSubGroup(LinearLayout parent, String zh, String en) {
+        LinearLayout g = new LinearLayout(this);
+        g.setOrientation(LinearLayout.VERTICAL);
+        TextView h = Ui.text(this, L.t(this, zh, en), 18, Ui.COLOR_TEXT_DIM);
+        h.setGravity(android.view.Gravity.LEFT);
+        h.setPadding(0, 28, 0, 4);
+        g.addView(h, Ui.rowParams(this));
+        parent.addView(g, Ui.rowParams(this));
+        return g;
+    }
+
+    /** GRP-2（v14 修訂）：裝置型態偵測——電視（Leanback／TV UI 模式）回傳 true，平板／手機 false。 */
+    private boolean isTvDevice() {
+        try {
+            UiModeManager um = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+            if (um != null && um.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            return getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** DEV-1（v14 修訂）：開發人員選項是否已開啟（此旗標系統允許讀取、不允許一般 App 寫入）。 */
+    private boolean isDeveloperModeOn() {
+        try {
+            return Settings.Global.getInt(getContentResolver(),
+                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * DEV-1（v14 修訂）：開發人員選項捷徑。已開啟→直達開發人員選項頁；
+     * 未開啟→跳「關於」頁並提示連點版本號。自動代按 7 下做不到：
+     * 該開關是 OS 層級閘門（防誤開／防惡意啟用偵錯），系統只提供讀取與
+     * Intent 導航，不開放一般 App 寫入旗標或在他 App 介面模擬點按。
+     */
+    private void openDeveloperOptions() {
+        if (isDeveloperModeOn()) {
+            openSettingsIntent(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+        } else {
+            toast(L.t(this, "尚未開啟：在「關於」頁連點『版本號』7 次即可開啟（系統規定須手點，App 無法代按）",
+                    "Not enabled yet: on the About page, tap 'Build number' 7 times (the system requires manual taps — apps can't do it for you)"));
+            openSettingsIntent(new Intent(Settings.ACTION_DEVICE_INFO_SETTINGS));
         }
     }
 

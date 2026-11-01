@@ -27,6 +27,14 @@
 6. 接著關閉機器人的群組隱私模式（不關的話，機器人在群組裡看不到訊息，配對和指令都會失靈）：
    在 BotFather 輸入 `/mybots` → 點你的機器人 → **Bot Settings** → **Group Privacy** → **Turn off**。
 
+**時機點與權限核對表（順序錯了會失靈）**
+
+- **Group Privacy 必須在把 bot 加進群組「之前」關掉**；bot 已經在群組裡才改，必須先把 bot 移出群組、再重新加入才會生效。
+- **Allow Groups 保持開啟**（Bot Settings 內，預設即開）；關掉的話 bot 加不進任何群組。
+- bot **不需要**設為群組管理員：隱私關掉後，一般成員身分就能讀訊息與發送。
+- **一台裝置＝一隻 bot＋一個群組**，電視與平板不可共用同一隻 bot（訊息佇列只有一份，共用會互相搶訊息）。
+- Inline Mode 等其他 Bot Settings 本專案用不到，維持預設即可。
+
 ## 步驟二：token 是什麼、在哪裡拿
 
 - token 是機器人的「鑰匙」，誰拿到它就能操控你的機器人。**不要截圖外流、不要貼到公開地方。**
@@ -67,6 +75,8 @@
    清單裡出現該裝置且狀態是 `device` 就成功了。
    **注意：只要離開無線偵錯主頁面，連接埠就可能改變；連不上時，回到主頁看新的埠號再 connect 一次。
    電視重開機後無線偵錯會自動關閉，要重新開啟再 connect（不用重新 pair）。**
+   （若裝置已經裝好本 App，也可在 App 的「其他設定 → 開發人員選項」按鈕查看目前狀態、
+   一鍵跳到「關於」頁；未開啟時仍需在該頁手點版本號 7 次——系統不允許 App 代按。）
 
 ## 步驟五：安裝 APK 並傳入 token
 
@@ -93,7 +103,7 @@
    v12 起：在平板上可改用 App 內的「貼上 Bot Token」直接貼上（會先驗證並顯示 bot 名稱，成功才儲存）；
    「重新讀取 token.txt」已改為可覆寫既有 token（換 token 時配對會一併清除，需重新配對）；
    狀態區下方有懸浮窗／無障礙／使用統計三顆按鈕可直接跳到各自的系統設定頁。
-   **v14 起電視推薦：免建 token.txt。** 解鎖設定後，在「步驟一：Bot Token」按「用手機設定 Token（電視推薦）」，
+   **v14 起電視推薦：免建 token.txt。** 解鎖設定後，在「步驟一：Bot Token」的「電視用」子群組按「用手機設定 Token」，
    電視會顯示一組區網網址與一次性 4 位代碼；手機連同一個 Wi-Fi 開啟該網址、輸入代碼並貼上 token，
    App 會先向 Telegram 驗證、把 bot 名稱顯示在電視上，成功才存檔。頁面只在開啟期間存在，
    儲存成功、代碼錯 5 次、逾 5 分鐘或關閉視窗，任一成立即自動關閉。
@@ -198,6 +208,18 @@ First-time setup takes about 20–30 minutes.
 6. Turn off group privacy (otherwise the bot can't see group messages and pairing/commands won't work):
    send `/mybots` → your bot → **Bot Settings** → **Group Privacy** → **Turn off**.
 
+**Timing & permissions checklist (order matters)**
+
+- **Turn Group Privacy off BEFORE adding the bot to a group.** If the bot is already in the
+  group when you change it, remove the bot from the group and add it again, or the change
+  won't take effect.
+- **Keep Allow Groups on** (in Bot Settings; on by default) — with it off, the bot can't join any group.
+- The bot does **not** need to be a group admin: with privacy off, a regular member can
+  read messages and send.
+- **One device = one bot + one group.** A TV and a tablet must not share a bot (the update
+  queue is single — two devices sharing one bot would steal each other's messages).
+- Other Bot Settings (Inline Mode, etc.) are unused by this project; leave the defaults.
+
 ## Step 2 — The token: where to find it again
 
 - The token is the bot's master key: anyone who has it controls your bot.
@@ -242,6 +264,9 @@ First-time setup takes about 20–30 minutes.
    port can change whenever you leave the wireless-debugging page — if connect fails,
    look at the main page again and use the new port. Wireless debugging turns itself OFF
    when the TV reboots; turn it back on and reconnect (no re-pairing needed).**
+   (If the app is already installed on the device, its "Other settings → Developer options"
+   button shows the current state and jumps straight to the About page; the 7 taps
+   themselves still have to be done by hand — the system doesn't let apps tap for you.)
 
 ## Step 5 — Install the APK and import the token
 
@@ -274,7 +299,7 @@ First-time setup takes about 20–30 minutes.
    token (pairing is cleared when the token changes — pair again afterwards); and three buttons
    under the status area jump straight to the Overlay / Accessibility / Usage-stats settings.
    **Since v14 (recommended on TV): no token.txt needed.** After unlocking settings, tap
-   "Set token from phone (recommended for TV)" in "Step 1: Bot token". The TV shows a local
+   "Set token from phone" in the "For TV" sub-group of "Step 1: Bot token". The TV shows a local
    URL and a one-time 4-digit code; on your phone (same Wi-Fi), open the URL, enter the code
    and paste the token. The app verifies it with Telegram and shows the bot name on the TV
    before saving. The page exists only while open and closes itself after a successful save,
