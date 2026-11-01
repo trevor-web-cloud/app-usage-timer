@@ -1,11 +1,11 @@
-# TV Timer 看電視計時
+# 應用程式使用計時 App Usage Timer
 
 為 Chromecast with Google TV 4K 自製的兒童看電視計時系統：一個常駐背景的「看門狗」App，
 監看觀看類 App 的使用時間；家長用自己的 Telegram bot 在手機上收回報、遠端加時與核准。
 
-**目前版本：v13（versionCode 12 / 1.11-v13）** ｜ 專案網頁：https://trevor-web-cloud.github.io/tvtimer/
+**目前版本：v14（versionCode 13 / 1.12-v14）** ｜ 專案網頁：https://trevor-web-cloud.github.io/app-usage-timer/
 
-📥 **直接下載 APK 安裝**：[Releases 頁](https://github.com/trevor-web-cloud/tvtimer/releases)（不需自行編譯）
+📥 **直接下載 APK 安裝**：[Releases 頁](https://github.com/trevor-web-cloud/app-usage-timer/releases)（不需自行編譯）
 📖 **詳細安裝教學**（建機器人、取得 token、配對、權限、疑難排解）：[SETUP.md](SETUP.md)
 
 > English version below.
@@ -19,17 +19,18 @@
 - **家長模式**：PIN 或 Telegram 核准進入（2 小時或待機結束），家長模式中看門狗休眠
 - **Telegram 整合**：專用 bot 回報開始／結束／超時；家長在群組一鍵核准、遠端 +15／+30 分鐘或立即結束；爸媽兩人皆可核准並註明核准人
 - **觀看清單可自訂**：預設 YouTube、YouTube Kids、Netflix、Disney+、Prime Video，可增減任意已安裝 App（主畫面本身除外）
+- **手機網頁輸入 token（v14）**：電視端免建 token.txt、免 ADB 傳檔——解鎖設定後開啟一次性區網頁面，用手機貼上 token（一次性代碼＋Telegram 驗證，成功後自動關閉）
 - **雙語介面**：繁體中文／English 可切換
 
 ## 運作方式
 
 純 Android framework API、零第三方函式庫。前台服務常駐監看，計時狀態全部持久化，
 重開機自動還原（含今日累計，具 NTP 校時延遲防護）。Bot token 不寫在程式碼裡：
-由家長在本機產生 token 檔、經 ADB 推入裝置，App 首次啟動匯入私有儲存後即刪除原檔。
+由家長在本機產生 token 檔、經 ADB 推入裝置，App 首次啟動匯入私有儲存後即刪除原檔；v14 起電視也可改用「用手機設定 Token」的一次性區網頁面輸入（見 SETUP 步驟五）。
 
 ## 安裝（一般使用者）
 
-不需自行編譯：到 [Releases](https://github.com/trevor-web-cloud/tvtimer/releases) 下載最新版 APK，
+不需自行編譯：到 [Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) 下載最新版 APK，
 再照 [詳細安裝教學 SETUP.md](SETUP.md) 一步步完成——建立 Telegram 機器人、取得 token、
 ADB 無線連線、傳入 token、授予懸浮窗／無障礙／使用情況存取三項權限、設定 PIN、群組配對，
 全程約 20–30 分鐘（Chromecast with Google TV 4K、Android TV OS 14 實測）。
@@ -55,15 +56,15 @@ ADB 無線連線、傳入 token、授予懸浮窗／無障礙／使用情況存�
 
 ---
 
-# TV Timer
+# App Usage Timer
 
 A homemade screen-time system for kids on Chromecast with Google TV 4K: a resident
 "watchdog" app that times viewing apps, while parents receive reports and grant
 approvals from their phones through their own Telegram bot.
 
-**Current version: v13 (versionCode 12 / 1.11-v13)** ｜ Project page: https://trevor-web-cloud.github.io/tvtimer/
+**Current version: v14 (versionCode 13 / 1.12-v14)** ｜ Project page: https://trevor-web-cloud.github.io/app-usage-timer/
 
-📥 **Download the ready-made APK**: [Releases](https://github.com/trevor-web-cloud/tvtimer/releases) (no build needed)
+📥 **Download the ready-made APK**: [Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) (no build needed)
 📖 **Detailed setup guide** (bot creation, token, pairing, permissions, troubleshooting): [SETUP.md](SETUP.md)
 
 ## Features
@@ -75,6 +76,7 @@ approvals from their phones through their own Telegram bot.
 - **Parent mode**: entered by PIN or Telegram approval (2 hours or until standby); the watchdog sleeps while it's on
 - **Telegram integration**: a dedicated bot reports session start/end/timeout; parents approve in a group chat, add +15/+30 minutes remotely, or end the session; either parent can approve, and approvals are attributed
 - **Custom watch list**: YouTube, YouTube Kids, Netflix, Disney+ and Prime Video by default; any installed app can be added or removed (except the home launcher itself)
+- **Phone web token setup (v14)**: no token.txt or ADB file push on the TV — unlock settings, open the one-time local web page, and paste the token from your phone (one-time code + Telegram verification; closes itself after saving)
 - **Bilingual UI**: Traditional Chinese / English switcher
 
 ## How it works
@@ -83,12 +85,12 @@ Pure Android framework APIs, zero third-party libraries. A foreground service ke
 watch; all timer state is persisted and restored across reboots (including the daily
 total, hardened against NTP clock-sync delay at boot). The bot token is never in the
 source: a parent generates a token file on their PC, pushes it to the device via ADB,
-and the app imports it into private storage on first launch and deletes the file.
+and the app imports it into private storage on first launch and deletes the file. Since v14, a TV can instead use the one-time local web page ("Set token from phone"; see SETUP Step 5).
 
 ## Install (end users)
 
 No build needed: download the latest APK from
-[Releases](https://github.com/trevor-web-cloud/tvtimer/releases) and follow the
+[Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) and follow the
 [detailed setup guide (SETUP.md)](SETUP.md) — create a Telegram bot, get its token,
 connect via wireless ADB, import the token, grant the overlay / accessibility /
 usage-access permissions, set a PIN, and pair the parents' group

@@ -702,7 +702,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
         Prefs.clearPendingPairing(this);
         if (telegram != null) {
             telegram.sendTextAsync(pairId,
-                    L.t(this, "✅ 配對成功！看電視計時的回報與核准會送到這個群組。", "✅ Paired! TV Timer reports and approvals will be sent to this group."));
+                    L.t(this, "✅ 配對成功！應用程式使用計時的回報與核准會送到這個群組。", "✅ Paired! App Usage Timer reports and approvals will be sent to this group."));
         }
         if (gate != null && gate.isShowing()
                 && gate.currentPage() == GateController.PAGE_PAIRING) {
@@ -766,7 +766,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
 
     private String statusText() {
         TimerEngine.Snapshot s = engine.snapshot();
-        StringBuilder sb = new StringBuilder(L.t(this, "📊 看電視計時狀態\n", "📊 TV Timer status\n"));
+        StringBuilder sb = new StringBuilder(L.t(this, "📊 應用程式使用計時狀態\n", "📊 App Usage Timer status\n"));
         sb.append(L.t(this, "今日累計：", "Today: ")).append(Math.round(s.todayMs / 60000.0)).append(L.t(this, " 分鐘\n", " min\n"));
         if (s.parentMode) {
             sb.append(L.t(this, "目前：家長模式", "Status: parent mode"));
@@ -795,7 +795,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null) {
             NotificationChannel ch = new NotificationChannel(
-                    CHANNEL_ID, L.t(this, "看電視計時", "TV Timer"), NotificationManager.IMPORTANCE_LOW);
+                    CHANNEL_ID, L.t(this, "應用程式使用計時", "App Usage Timer"), NotificationManager.IMPORTANCE_LOW);
             nm.createNotificationChannel(ch);
         }
     }
@@ -805,7 +805,7 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
         PendingIntent pi = PendingIntent.getActivity(this, 0, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         return new Notification.Builder(this, CHANNEL_ID)
-                .setContentTitle(L.t(this, "看電視計時", "TV Timer"))
+                .setContentTitle(L.t(this, "應用程式使用計時", "App Usage Timer"))
                 .setContentText(L.t(this, "看門狗運作中", "Watchdog is running"))
                 .setSmallIcon(R.drawable.ic_stat_timer)
                 .setContentIntent(pi)

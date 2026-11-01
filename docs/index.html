@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TV Timer 看電視計時 — Chromecast with Google TV 兒童計時看門狗</title>
-<meta name="description" content="為 Chromecast with Google TV 4K 自製的兒童看電視計時系統：背景看門狗監看觀看 App，家長以 Telegram 遠端核准與加時。A parental screen-time watchdog for Chromecast with Google TV, with Telegram approvals.">
+<title>應用程式使用計時 App Usage Timer — Chromecast with Google TV 兒童計時看門狗</title>
+<meta name="description" content="為 Chromecast with Google TV 4K 自製的兒童應用程式使用計時系統：背景看門狗監看觀看 App，家長以 Telegram 遠端核准與加時。A parental screen-time watchdog for Chromecast with Google TV, with Telegram approvals.">
 <link rel="icon" href="assets/icon.png">
 <style>
   :root { --bg:#0b1e3a; --panel:#123058; --line:#2b4a7a; --text:#eef3fb; --muted:#a9bedd; --accent:#ffb300; }
@@ -38,19 +38,19 @@
 </head>
 <body>
 <header>
-  <img class="banner" src="assets/banner.png" alt="TV Timer">
+  <img class="banner" src="assets/banner.png" alt="App Usage Timer">
   <div class="langbar">
     <button id="btnZh" class="on" onclick="setLang('zh')">繁體中文</button>
     <button id="btnEn" onclick="setLang('en')">English</button>
   </div>
-  <h1><span data-zh>看電視計時 TV Timer</span><span data-en>TV Timer</span></h1>
+  <h1><span data-zh>應用程式使用計時</span><span data-en>App Usage Timer</span></h1>
   <p class="sub">
-    <span data-zh>Chromecast with Google TV 4K 兒童計時系統 · 背景看門狗 ＋ Telegram 家長核准 · 目前版本 v13</span>
-    <span data-en>A screen-time system for kids on Chromecast with Google TV 4K · watchdog + Telegram parent approvals · current version v13</span>
+    <span data-zh>Chromecast with Google TV 4K 兒童計時系統 · 背景看門狗 ＋ Telegram 家長核准 · 目前版本 v14</span>
+    <span data-en>A screen-time system for kids on Chromecast with Google TV 4K · watchdog + Telegram parent approvals · current version v14</span>
   </p>
   <div class="langbar">
-    <a href="https://github.com/trevor-web-cloud/tvtimer/releases"><button>📥 <span data-zh>下載 APK</span><span data-en>Download APK</span></button></a>
-    <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md"><button>📖 <span data-zh>詳細安裝教學</span><span data-en>Setup guide</span></button></a>
+    <a href="https://github.com/trevor-web-cloud/app-usage-timer/releases"><button>📥 <span data-zh>下載 APK</span><span data-en>Download APK</span></button></a>
+    <a href="https://github.com/trevor-web-cloud/app-usage-timer/blob/main/SETUP.md"><button>📖 <span data-zh>詳細安裝教學</span><span data-en>Setup guide</span></button></a>
   </div>
 </header>
 <main>
@@ -80,16 +80,16 @@
   <ul>
     <li><span data-zh>純 Android framework API、零第三方函式庫；前台服務常駐，狀態全部持久化，重開機自動還原（今日累計具 NTP 校時防護）。</span>
         <span data-en>Pure Android framework APIs, zero third-party libraries; a foreground service keeps watch, all state persists and restores across reboots (daily total hardened against NTP sync delay).</span></li>
-    <li><span data-zh>Bot token 不寫在程式碼裡：家長在 PC 產生 token 檔，經 ADB 推入裝置，App 匯入私有儲存後刪除原檔。</span>
-        <span data-en>The bot token is never in the source: a parent pushes a token file via ADB; the app imports it into private storage and deletes the file.</span></li>
+    <li><span data-zh>Bot token 不寫在程式碼裡：家長在 PC 產生 token 檔，經 ADB 推入裝置，App 匯入私有儲存後刪除原檔；v14 起電視也可用手機開啟一次性區網頁面貼上 token。</span>
+        <span data-en>The bot token is never in the source: a parent pushes a token file via ADB; the app imports it into private storage and deletes the file. Since v14, a TV can instead use a one-time local web page opened from the phone.</span></li>
     <li><span data-zh>沒有時段就開觀看 App 會被全屏攔截，可直接開局或送出核准請求；剩 1 分鐘警告、到時回主畫面鎖定。</span>
         <span data-en>Opening a viewing app with no session shows a full-screen gate — start a session or request approval; 1-minute warning, then auto-lock at time-up.</span></li>
   </ul>
 
   <h2><span data-zh>建置與安裝</span><span data-en>Build &amp; install</span></h2>
   <ul>
-    <li><span data-zh>一般使用者免編譯：到 <a href="https://github.com/trevor-web-cloud/tvtimer/releases">Releases</a> 下載最新版 APK，再照 <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md">詳細安裝教學</a> 逐步完成（建機器人、取 token、傳入、權限、配對、疑難排解）。</span>
-        <span data-en>End users: no build needed — download the latest APK from <a href="https://github.com/trevor-web-cloud/tvtimer/releases">Releases</a> and follow the <a href="https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md">detailed setup guide</a> (bot, token, import, permissions, pairing, troubleshooting).</span></li>
+    <li><span data-zh>一般使用者免編譯：到 <a href="https://github.com/trevor-web-cloud/app-usage-timer/releases">Releases</a> 下載最新版 APK，再照 <a href="https://github.com/trevor-web-cloud/app-usage-timer/blob/main/SETUP.md">詳細安裝教學</a> 逐步完成（建機器人、取 token、傳入、權限、配對、疑難排解）。</span>
+        <span data-en>End users: no build needed — download the latest APK from <a href="https://github.com/trevor-web-cloud/app-usage-timer/releases">Releases</a> and follow the <a href="https://github.com/trevor-web-cloud/app-usage-timer/blob/main/SETUP.md">detailed setup guide</a> (bot, token, import, permissions, pairing, troubleshooting).</span></li>
     <li><span data-zh>以 ADB 側載至 Chromecast with Google TV 4K（Android TV OS 14 實測），授予懸浮窗、無障礙、使用情況存取三項權限，並完成 token 匯入、bot 配對與 PIN 設定。</span>
         <span data-en>Sideload via ADB onto a Chromecast with Google TV 4K (tested on Android TV OS 14); grant overlay, accessibility and usage-access permissions, import the token, pair your bot and set a PIN.</span></li>
     <li><span data-zh>開發者從原始碼建置：JDK 21 ＋ Gradle 8.9 ＋ Android SDK 34，執行 <code>gradle assembleRelease</code>。</span>
@@ -109,7 +109,7 @@
 </main>
 <footer>
   <span data-zh>原始碼與變更紀錄：</span><span data-en>Source &amp; changelog: </span>
-  <a href="https://github.com/trevor-web-cloud/tvtimer">github.com/trevor-web-cloud/tvtimer</a>
+  <a href="https://github.com/trevor-web-cloud/app-usage-timer">github.com/trevor-web-cloud/app-usage-timer</a>
 </footer>
 <script>
 function setLang(l){

@@ -372,7 +372,7 @@ public class GateController {
     // ================= pages =================
 
     private View buildStart(TimerEngine.Snapshot s) {
-        addTitle(L.t(ctx, "看電視計時", "TV Timer"));
+        addTitle(L.t(ctx, "應用程式使用計時", "App Usage Timer"));
         addSub(L.t(ctx, "今天已看 ", "Watched ") + minutesOf(s.todayMs) + L.t(ctx, " 分鐘", " min today"));
         if (deniedNote) {
             addNote(L.t(ctx, "上一個請求已被爸媽拒絕。", "Your last request was denied by a parent."));

@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * 看電視計時的核心狀態機（純邏輯，不直接碰 UI / 網路）。
+ * 應用程式使用計時的核心狀態機（純邏輯，不直接碰 UI / 網路）。
  *
  * 所有對外效果都透過 {@link Events} 交給 WatchdogService 執行；
  * 所有狀態變更都即時寫入 Prefs，電視重開機不會遺失任何狀態。

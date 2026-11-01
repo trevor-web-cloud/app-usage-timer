@@ -1,4 +1,4 @@
-# TV Timer 詳細安裝與設定教學
+# 應用程式使用計時 詳細安裝與設定教學
 
 一步一步帶你完成：建立 Telegram 機器人 → 取得 token → 把 APK 裝上電視 → 傳入 token →
 開通三項權限 → 設定 PIN → 建立家長群組並配對。第一次設定約需 20–30 分鐘。
@@ -37,8 +37,8 @@
 ## 步驟三：下載 APK 與 ADB 工具（電腦上）
 
 1. 到本專案的 Releases 頁下載最新版 APK：
-   https://github.com/trevor-web-cloud/tvtimer/releases
-   （檔名類似 `tvtimer-v10.apk`）
+   https://github.com/trevor-web-cloud/app-usage-timer/releases
+   （檔名類似 `tvtimer-v14.apk`）
 2. 下載 Google 官方的 platform-tools（裡面有 `adb.exe`）：
    https://developer.android.com/tools/releases/platform-tools
    選 Windows 版，解壓縮到一個固定位置，例如 `D:\platform-tools`。
@@ -72,9 +72,9 @@
 
 1. 安裝（還連著線的 PowerShell）：
    ```powershell
-   .\adb install -r tvtimer-v10.apk
+   .\adb install -r tvtimer-v14.apk
    ```
-   看到 `Success` 完成。此時電視的應用程式清單會出現「看電視計時」（碼表圖示）。
+   看到 `Success` 完成。此時電視的應用程式清單會出現「應用程式使用計時」（碼表圖示）。
 2. 在電腦用記事本建立 `token.txt`：內容**只有 token 一行**，不要加空白、引號或其他文字，存到 `D:\platform-tools`。
 3. 把 token 檔推上電視並開啟 App：
    ```powershell
@@ -93,16 +93,20 @@
    v12 起：在平板上可改用 App 內的「貼上 Bot Token」直接貼上（會先驗證並顯示 bot 名稱，成功才儲存）；
    「重新讀取 token.txt」已改為可覆寫既有 token（換 token 時配對會一併清除，需重新配對）；
    狀態區下方有懸浮窗／無障礙／使用統計三顆按鈕可直接跳到各自的系統設定頁。
+   **v14 起電視推薦：免建 token.txt。** 解鎖設定後，在「步驟一：Bot Token」按「用手機設定 Token（電視推薦）」，
+   電視會顯示一組區網網址與一次性 4 位代碼；手機連同一個 Wi-Fi 開啟該網址、輸入代碼並貼上 token，
+   App 會先向 Telegram 驗證、把 bot 名稱顯示在電視上，成功才存檔。頁面只在開啟期間存在，
+   儲存成功、代碼錯 5 次、逾 5 分鐘或關閉視窗，任一成立即自動關閉。
 
 ## 步驟六：在 App 內依編號開通權限
 
-打開「看電視計時」，狀態區下方有「權限設定」編號清單（v13 起），照編號 1 到 5 依序開通：
+打開「應用程式使用計時」，狀態區下方有「權限設定」編號清單（v13 起），照編號 1 到 5 依序開通：
 
 1. **允許受限制的設定**：按鈕直達 App 資訊頁，在小米／HyperOS 平板上要捲到最下方「進階設定」開啟
    （這步沒開，第 2 步的無障礙會直接遭拒；電視與原生 Android 可能不需要此步，找不到就跳過）。
-2. **無障礙服務**：在「下載的應用程式／已安裝的應用程式」裡找到 TV Timer，開啟並確認 10 秒倒數警告。
-3. **使用情況存取權**：允許 TV Timer 存取使用情況。
-4. **在其他應用程式上層顯示（懸浮窗）**：允許 TV Timer。
+2. **無障礙服務**：在「下載的應用程式／已安裝的應用程式」裡找到 App Usage Timer，開啟並確認 10 秒倒數警告。
+3. **使用情況存取權**：允許 App Usage Timer 存取使用情況。
+4. **在其他應用程式上層顯示（懸浮窗）**：允許 App Usage Timer。
 5. **省電策略**：設為無限制（小米／HyperOS 另在 App 資訊頁的「省電策略」列確認顯示無限制），
    避免看門狗被系統凍結。
 
@@ -119,7 +123,7 @@
 
 1. 在 Telegram 建立一個**群組**，把爸爸、媽媽都加進去，再把步驟一的機器人也加進群組。
 2. 在群組裡隨便傳一則訊息（例如打「配對」兩個字）。
-3. 回到電視的「看電視計時」，會跳出**配對確認**，上面顯示這個群組的名稱——
+3. 回到電視的「應用程式使用計時」，會跳出**配對確認**，上面顯示這個群組的名稱——
    確認是你們自己的群組後，在電視上按「確認配對」。
    （這是刻意的安全設計：綁定必須在電視本機確認，陌生群組沒辦法自己綁進來。
    配對確認有 **10 分鐘時限**，逾時只要在群組再傳一則訊息即可重新發起。）
@@ -144,7 +148,7 @@
 | 機器人在群組沒反應 | 檢查步驟一第 6 點（Group Privacy 有沒有 Turn off）、機器人是否真的在群組裡、token 是否匯入成功 |
 | token 沒匯入 | 確認檔案路徑是 `/sdcard/tvtimer/token.txt`、內容只有一行；按 App 的「重新讀取 token.txt」；必要時重推一次 |
 | 爸媽自己也被設定擋住 | 先進「家長模式」再去系統設定，這是刻意的（小孩模式下設定被鎖定） |
-| 要移除 TV Timer | 先進家長模式，再到 設定 → 應用程式 → 看電視計時 → 解除安裝 |
+| 要移除 App Usage Timer | 先進家長模式，再到 設定 → 應用程式 → 應用程式使用計時 → 解除安裝 |
 | 用手機投放看影片沒計時 | 已知限制：投放（Cast）不計時，本 App 計的是在電視上開 App 觀看的時間 |
 
 ## 安全提醒
@@ -159,8 +163,8 @@
 
 **方法一：在電視上移除**
 
-1. 開 TV Timer，先進**家長模式**（輸入 PIN，或在 Telegram 群組核准）。這一步不能省：小孩模式下設定被 App 擋住，是設計行為。
-2. 回主畫面 → **設定 → 應用程式 → TV Timer → 解除安裝**。
+1. 開 App Usage Timer，先進**家長模式**（輸入 PIN，或在 Telegram 群組核准）。這一步不能省：小孩模式下設定被 App 擋住，是設計行為。
+2. 回主畫面 → **設定 → 應用程式 → App Usage Timer → 解除安裝**。
 
 **方法二：用電腦 ADB 移除**（不需進家長模式）
 
@@ -171,7 +175,7 @@
 
 ---
 
-# TV Timer — Detailed Setup Guide (English)
+# App Usage Timer — Detailed Setup Guide (English)
 
 Step by step: create a Telegram bot → get its token → install the APK on the TV →
 import the token → grant three permissions → set a PIN → create the parents' group and pair.
@@ -187,7 +191,7 @@ First-time setup takes about 20–30 minutes.
 
 1. In Telegram, open a chat with **@BotFather** (the official, verified account).
 2. Send `/newbot`.
-3. Enter a **display name** (e.g., "Family TV Timer") — can be changed later.
+3. Enter a **display name** (e.g., "Family App Usage Timer") — can be changed later.
 4. Enter a **username**: letters/digits/underscores, must end in `bot` (e.g., `mytv_timer_bot`), and globally unique.
 5. BotFather replies with your **token**, which looks like
    `1234567890:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`. Save it for Step 5.
@@ -205,7 +209,7 @@ First-time setup takes about 20–30 minutes.
 ## Step 3 — Download the APK and ADB tools (on your PC)
 
 1. Download the latest APK from this project's Releases page:
-   https://github.com/trevor-web-cloud/tvtimer/releases (file name like `tvtimer-v10.apk`)
+   https://github.com/trevor-web-cloud/app-usage-timer/releases (file name like `tvtimer-v14.apk`)
 2. Download Google's official platform-tools (contains `adb.exe`):
    https://developer.android.com/tools/releases/platform-tools
    Get the Windows version and unzip it to a fixed place, e.g. `D:\platform-tools`.
@@ -243,9 +247,9 @@ First-time setup takes about 20–30 minutes.
 
 1. Install (same PowerShell):
    ```powershell
-   .\adb install -r tvtimer-v10.apk
+   .\adb install -r tvtimer-v14.apk
    ```
-   `Success` means installed. "TV Timer" (stopwatch icon) now appears in the TV's app list.
+   `Success` means installed. "App Usage Timer" (stopwatch icon) now appears in the TV's app list.
 2. Create `token.txt` in Notepad: the **token only, one line**, no spaces or quotes.
    Save it in `D:\platform-tools`.
 3. Push it to the TV and open the app:
@@ -269,19 +273,25 @@ First-time setup takes about 20–30 minutes.
    token and shows the bot name before saving); "Reload token.txt" now overwrites an existing
    token (pairing is cleared when the token changes — pair again afterwards); and three buttons
    under the status area jump straight to the Overlay / Accessibility / Usage-stats settings.
+   **Since v14 (recommended on TV): no token.txt needed.** After unlocking settings, tap
+   "Set token from phone (recommended for TV)" in "Step 1: Bot token". The TV shows a local
+   URL and a one-time 4-digit code; on your phone (same Wi-Fi), open the URL, enter the code
+   and paste the token. The app verifies it with Telegram and shows the bot name on the TV
+   before saving. The page exists only while open and closes itself after a successful save,
+   5 wrong codes, 5 minutes, or when you close the dialog.
 
 ## Step 6 — Grant the permissions in the app, in numbered order
 
-Open TV Timer. Below the status area there is a numbered "Permissions" list (since v13).
+Open App Usage Timer. Below the status area there is a numbered "Permissions" list (since v13).
 Work through it in order, 1 to 5:
 
 1. **Allow restricted settings** — the button jumps to the App info page; on Xiaomi/HyperOS
    tablets scroll to the bottom ("Advanced settings") and turn it on. Without this step,
    step 2 is rejected outright. (TVs and stock Android may not need it — skip if absent.)
-2. **Accessibility service** — under "Downloaded apps / Installed apps", find TV Timer,
+2. **Accessibility service** — under "Downloaded apps / Installed apps", find App Usage Timer,
    turn it on and accept the 10-second countdown warning.
-3. **Usage access** — allow TV Timer.
-4. **Display over other apps (overlay)** — allow TV Timer.
+3. **Usage access** — allow App Usage Timer.
+4. **Display over other apps (overlay)** — allow App Usage Timer.
 5. **Battery policy** — set to unrestricted (on Xiaomi/HyperOS also confirm the "Battery
    saver" row on the App info page shows No restrictions), so the watchdog is not frozen.
 
@@ -299,7 +309,7 @@ Steps 2–5 should all show ✓.
 
 1. In Telegram, create a **group** with both parents, and add your bot (Step 1) to it.
 2. Send any message in the group (e.g., "pair").
-3. On the TV, TV Timer shows a **pairing confirmation** with that group's name — confirm it
+3. On the TV, App Usage Timer shows a **pairing confirmation** with that group's name — confirm it
    on the TV if it's yours. (By design, binding must be confirmed on the TV itself, so a
    stranger's group can't bind itself to your TV. The confirmation expires after
    **10 minutes** — just send another message in the group to restart it.)
@@ -327,7 +337,7 @@ Steps 2–5 should all show ✓.
 | Bot doesn't react in the group | Check Step 1 item 6 (Group Privacy turned off), that the bot is really in the group, and that the token was imported |
 | Token not imported | File must be at `/sdcard/tvtimer/token.txt` with exactly one line; use the app's "Reload token.txt"; re-push if needed |
 | Parents are blocked by Settings too | Enter parent mode first, then open system settings — the lock in kid mode is intentional |
-| Uninstalling TV Timer | Enter parent mode first, then Settings → Apps → TV Timer → Uninstall |
+| Uninstalling App Usage Timer | Enter parent mode first, then Settings → Apps → App Usage Timer → Uninstall |
 | Casting from a phone isn't timed | Known limitation: casting is not timed; the app times viewing apps opened on the TV itself |
 
 ## Security notes
@@ -342,8 +352,8 @@ You can remove the app completely at any time. It does not use device-admin righ
 
 **Option 1 — On the TV**
 
-1. Open TV Timer and enter **Parent Mode** first (PIN, or approval in the Telegram group). This step is required: in child state the app blocks Settings by design.
-2. Go back to the home screen → **Settings → Apps → TV Timer → Uninstall**.
+1. Open App Usage Timer and enter **Parent Mode** first (PIN, or approval in the Telegram group). This step is required: in child state the app blocks Settings by design.
+2. Go back to the home screen → **Settings → Apps → App Usage Timer → Uninstall**.
 
 **Option 2 — From your PC with ADB** (no Parent Mode needed)
 

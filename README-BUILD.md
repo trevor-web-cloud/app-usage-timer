@@ -6,7 +6,7 @@ compileSdk 34 / minSdk 30 / targetSdk 34，目標裝置為 Chromecast with Googl
 
 > 📌 **一般使用者請勿照本文件安裝**：直接到 GitHub Releases 下載已建置好的 APK，
 > 並照 SETUP.md 的詳細教學操作即可（免編譯）：
-> https://github.com/trevor-web-cloud/tvtimer/blob/main/SETUP.md
+> https://github.com/trevor-web-cloud/app-usage-timer/blob/main/SETUP.md
 > 本文件是**開發者用**的建置、授權與設計手冊。
 
 ---

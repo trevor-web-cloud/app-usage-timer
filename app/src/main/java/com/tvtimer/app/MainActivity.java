@@ -50,6 +50,9 @@ public class MainActivity extends Activity {
     private boolean pinChangeArmed;
     private LinearLayout pairingBox;
     private TextView pairingText;
+    /** WEB-1（v14）：手機網頁輸入 token 的一次性區網伺服器與其對話框。 */
+    private TokenWebServer webServer;
+    private AlertDialog webDialog;
     private final Runnable refresher = new Runnable() {
         @Override
         public void run() {
@@ -78,6 +81,16 @@ public class MainActivity extends Activity {
         super.onPause();
     }
 
+    @Override
+    protected void onDestroy() {
+        // WEB-1：離開畫面即停服，不讓一次性設定頁在背景殘留
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
+        super.onDestroy();
+    }
+
     // ================= UI =================
 
     private void buildUi() {
@@ -88,7 +101,7 @@ public class MainActivity extends Activity {
         col.setPadding(Ui.dp(this, 48), Ui.dp(this, 32), Ui.dp(this, 48), Ui.dp(this, 32));
         scroll.addView(col);
 
-        TextView title = Ui.text(this, L.t(this, "看電視計時", "TV Timer"), 34, Ui.COLOR_TEXT);
+        TextView title = Ui.text(this, L.t(this, "應用程式使用計時", "App Usage Timer"), 34, Ui.COLOR_TEXT);
         title.setGravity(android.view.Gravity.LEFT);
         col.addView(title, Ui.rowParams(this));
 
@@ -472,6 +485,17 @@ public class MainActivity extends Activity {
         });
         settingsBox.addView(pasteToken, Ui.rowParams(this));
 
+        // --- WEB-1（v14）：用手機設定 token（電視遙控器打 45 字元不切實際；
+        // 改開一次性區網頁面讓家長用手機貼上，成功/逾時/取消即關閉） ---
+        Button webToken = Ui.bigButton(this, L.t(this, "用手機設定 Token（電視推薦）", "Set token from phone (recommended for TV)"));
+        webToken.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebTokenSetup();
+            }
+        });
+        settingsBox.addView(webToken, Ui.rowParams(this));
+
         // --- v6：介面語言切換（按鈕文字雙語並列，不經 L.t） ---
         Button langBtn = Ui.bigButton(this, "介面語言 / Language：中文 ⇄ English");
         langBtn.setOnClickListener(new View.OnClickListener() {
@@ -494,7 +518,7 @@ public class MainActivity extends Activity {
         settingsBox.addView(capBtn, Ui.rowParams(this));
 
         // --- GRP-1（v13）：把設定項移入群組（建構順序不動，只改歸屬與顯示順序） ---
-        moveToGroup(grpToken, fileAccess, pasteToken, rereadToken, clearToken);
+        moveToGroup(grpToken, webToken, fileAccess, pasteToken, rereadToken, clearToken);
         moveToGroup(grpPair, clearPairing);
         moveToGroup(grpWatch, watchBox);
         moveToGroup(grpParent, parentRow);
@@ -883,6 +907,89 @@ public class MainActivity extends Activity {
     /** TOK-2（v12）：設定頁動作的統一反饋出口。 */
     private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    /** WEB-1（v14）：開啟一次性區網設定頁，讓家長用手機貼上 token。 */
+    private boolean webSaveDone;
+
+    private void startWebTokenSetup() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
+        webSaveDone = false;
+        // Listener 在建構期間就會被引用，須經 holder 間接指向自己（避免 definite-assignment 錯誤）
+        final TokenWebServer[] ref = new TokenWebServer[1];
+        ref[0] = new TokenWebServer(this, new TokenWebServer.Listener() {
+            @Override
+            public void onTokenSaved(final String botUsername, final boolean replaced, final boolean same) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        webSaveDone = true;
+                        if (!same) {
+                            WatchdogService.start(MainActivity.this);
+                        }
+                        toast(same
+                                ? L.t(MainActivity.this, "與目前 token 相同，未變更", "Same as the current token — unchanged")
+                                : replaced
+                                        ? L.t(MainActivity.this, "已換上新 token（@" + botUsername + "），請重新配對", "Token replaced (@" + botUsername + ") — please pair again")
+                                        : L.t(MainActivity.this, "已儲存 token（@" + botUsername + "），請在群組發訊息配對", "Token saved (@" + botUsername + ") — send a message in the group to pair"));
+                        if (webDialog != null && webDialog.isShowing()) {
+                            webDialog.dismiss();
+                        }
+                        refreshStatus();
+                    }
+                });
+            }
+
+            @Override
+            public void onClosed() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (webServer == ref[0]) {
+                            webServer = null;
+                        }
+                        if (!webSaveDone && webDialog != null && webDialog.isShowing()) {
+                            webDialog.dismiss();
+                            toast(L.t(MainActivity.this, "手機設定頁面已關閉（逾時或代碼錯誤過多）", "The phone setup page has closed (timed out or too many wrong codes)"));
+                        }
+                    }
+                });
+            }
+        });
+        final TokenWebServer server = ref[0];
+        if (!server.start()) {
+            toast(L.t(this, "找不到區網位址，請先連上 Wi-Fi／網路線", "No LAN address found — connect Wi-Fi or Ethernet first"));
+            return;
+        }
+        webServer = server;
+        String msg = L.t(this, "用手機瀏覽器開啟（手機需連同一個 Wi-Fi）：\n", "Open this in your phone's browser (same Wi-Fi):\n")
+                + server.getUrl() + "\n"
+                + L.t(this, "一次性代碼：", "One-time code: ") + server.getCode() + "\n"
+                + L.t(this, "頁面 5 分鐘內有效；儲存成功、逾時或關閉本視窗後自動失效。",
+                        "Valid for 5 minutes. It closes itself after a successful save, on timeout, or when you close this dialog.");
+        webDialog = new AlertDialog.Builder(this)
+                .setTitle(L.t(this, "用手機設定 Token", "Set token from phone"))
+                .setMessage(msg)
+                .setNegativeButton(L.t(this, "關閉頁面", "Close page"), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface d, int which) {
+                        server.stop();
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface d) {
+                        server.stop();
+                        if (webServer == server) {
+                            webServer = null;
+                        }
+                        webDialog = null;
+                    }
+                })
+                .show();
     }
 
     /** PERM-2（v13）：直達本 App 資訊頁（「允許受限制的設定」與「省電策略」列都在這頁）。 */
