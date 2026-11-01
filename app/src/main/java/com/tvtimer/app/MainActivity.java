@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * 狀態／設定畫面（leanback 可啟動）。
@@ -35,6 +36,9 @@ public class MainActivity extends Activity {
     private boolean settingsUnlocked;
     private TextView statusView;
     private TextView permView;
+    private Button permOverlayBtn;
+    private Button permA11yBtn;
+    private Button permUsageBtn;
     private LinearLayout settingsBox;
     /** WL-1：觀看清單專用容器（自訂 App 增刪後可單獨重建，不必重開畫面）。 */
     private LinearLayout watchBox;
@@ -93,6 +97,36 @@ public class MainActivity extends Activity {
         permView = Ui.text(this, "", 20, Ui.COLOR_TEXT_DIM);
         permView.setGravity(android.view.Gravity.LEFT);
         col.addView(permView, Ui.rowParams(this));
+
+        // --- PERM-1（v12）：三顆權限直達按鈕（常駐可用，不受設定鎖定影響） ---
+        LinearLayout permRow = new LinearLayout(this);
+        permRow.setOrientation(LinearLayout.HORIZONTAL);
+        permOverlayBtn = Ui.bigButton(this, "");
+        permOverlayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsIntent(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + getPackageName())));
+            }
+        });
+        permRow.addView(permOverlayBtn, Ui.cellParams(this, 1));
+        permA11yBtn = Ui.bigButton(this, "");
+        permA11yBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsIntent(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+            }
+        });
+        permRow.addView(permA11yBtn, Ui.cellParams(this, 1));
+        permUsageBtn = Ui.bigButton(this, "");
+        permUsageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsIntent(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            }
+        });
+        permRow.addView(permUsageBtn, Ui.cellParams(this, 1));
+        col.addView(permRow, Ui.rowParams(this));
 
         // --- PIN 解鎖 ---
         LinearLayout pinRow = new LinearLayout(this);
@@ -280,9 +314,15 @@ public class MainActivity extends Activity {
         clearPairing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TOK-2（v12）：動作要有明確反饋，不再默默執行
+                boolean wasBound = Prefs.getChatId(MainActivity.this) != 0
+                        || Prefs.pendingPairingId(MainActivity.this) != 0;
                 Prefs.setChatId(MainActivity.this, 0);
                 Prefs.setChatTitle(MainActivity.this, "");
                 Prefs.clearPendingPairing(MainActivity.this);
+                toast(wasBound
+                        ? L.t(MainActivity.this, "已清除配對", "Pairing cleared")
+                        : L.t(MainActivity.this, "目前尚未配對，沒有可清除的綁定", "Not paired — nothing to clear"));
                 refreshStatus();
             }
         });
@@ -292,12 +332,42 @@ public class MainActivity extends Activity {
         rereadToken.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Prefs.importTokenIfNeeded(MainActivity.this);
-                WatchdogService.start(MainActivity.this);
+                // TOK-1（v12）：改為可覆寫＋三態反饋（TOK-2）。
+                // v11 以前已有 token 就跳過匯入，匯錯 token 只能清除資料解套。
+                String fileToken = Prefs.readTokenFile(MainActivity.this);
+                String current = Prefs.getToken(MainActivity.this);
+                if (fileToken == null) {
+                    toast(L.t(MainActivity.this, "找不到 token.txt 或內容不正確", "token.txt not found or invalid"));
+                } else if (fileToken.equals(current)) {
+                    toast(L.t(MainActivity.this, "檔案內容與目前 token 相同，未變更", "File matches the current token — unchanged"));
+                } else {
+                    Prefs.applyTokenChange(MainActivity.this, fileToken);
+                    WatchdogService.start(MainActivity.this);
+                    toast(current.isEmpty()
+                            ? L.t(MainActivity.this, "已匯入 token，請在群組發訊息配對", "Token imported — send a message in the group to pair")
+                            : L.t(MainActivity.this, "已換上新 token，配對已清除，請重新配對", "Token replaced and pairing cleared — please pair again"));
+                }
                 refreshStatus();
             }
         });
         settingsBox.addView(rereadToken, Ui.rowParams(this));
+
+        // --- TOK-1（v12）：清除 token（連同綁定與 offset 一併重置） ---
+        Button clearToken = Ui.bigButton(this, L.t(this, "清除 Bot Token", "Clear bot token"));
+        clearToken.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Prefs.getToken(MainActivity.this).isEmpty()) {
+                    toast(L.t(MainActivity.this, "目前沒有設定 token", "No token is set"));
+                } else {
+                    Prefs.applyTokenChange(MainActivity.this, "");
+                    WatchdogService.start(MainActivity.this);
+                    toast(L.t(MainActivity.this, "已清除 token 與配對", "Token and pairing cleared"));
+                }
+                refreshStatus();
+            }
+        });
+        settingsBox.addView(clearToken, Ui.rowParams(this));
 
         // --- PAD-2（v11）：直達「所有檔案存取權」設定頁（平板裝機時此頁深埋難找） ---
         Button fileAccess = Ui.bigButton(this, L.t(this, "開啟檔案存取設定（匯入 token 用）", "Open file-access settings (for token import)"));
@@ -318,6 +388,60 @@ public class MainActivity extends Activity {
             }
         });
         settingsBox.addView(fileAccess, Ui.rowParams(this));
+
+        // --- TOK-3（v12）：貼上 token（平板上建 token.txt 太困難，改以輸入窗貼上） ---
+        Button pasteToken = Ui.bigButton(this, L.t(this, "貼上 Bot Token", "Paste bot token"));
+        pasteToken.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText input = new EditText(MainActivity.this);
+                input.setHint(L.t(MainActivity.this, "貼上 BotFather 給的 token", "Paste the token from BotFather"));
+                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(L.t(MainActivity.this, "貼上 Bot Token", "Paste bot token"))
+                        .setView(input)
+                        .setPositiveButton(L.t(MainActivity.this, "驗證並儲存", "Verify & save"), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                final String candidate = input.getText().toString().trim();
+                                if (candidate.isEmpty()) {
+                                    toast(L.t(MainActivity.this, "沒有輸入內容", "Nothing was entered"));
+                                    return;
+                                }
+                                if (candidate.equals(Prefs.getToken(MainActivity.this))) {
+                                    toast(L.t(MainActivity.this, "與目前 token 相同，未變更", "Same as the current token — unchanged"));
+                                    return;
+                                }
+                                toast(L.t(MainActivity.this, "驗證中…", "Verifying…"));
+                                // 先以 getMe 驗證並回顯 bot 名稱核對，成功才存檔（不盲存）
+                                TelegramClient.validateTokenAsync(candidate, new TelegramClient.ValidationCallback() {
+                                    @Override
+                                    public void onResult(final boolean ok, final String username) {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (ok) {
+                                                    boolean hadToken = !Prefs.getToken(MainActivity.this).isEmpty();
+                                                    Prefs.applyTokenChange(MainActivity.this, candidate);
+                                                    WatchdogService.start(MainActivity.this);
+                                                    toast(hadToken
+                                                            ? L.t(MainActivity.this, "已換上新 token（@" + username + "），請重新配對", "Token replaced (@" + username + ") — please pair again")
+                                                            : L.t(MainActivity.this, "已儲存 token（@" + username + "），請在群組發訊息配對", "Token saved (@" + username + ") — send a message in the group to pair"));
+                                                } else {
+                                                    toast(L.t(MainActivity.this, "驗證失敗，token 不正確，未變更", "Verification failed — token not changed"));
+                                                }
+                                                refreshStatus();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton(L.t(MainActivity.this, "取消", "Cancel"), null)
+                        .show();
+            }
+        });
+        settingsBox.addView(pasteToken, Ui.rowParams(this));
 
         // --- v6：介面語言切換（按鈕文字雙語並列，不經 L.t） ---
         Button langBtn = Ui.bigButton(this, "介面語言 / Language：中文 ⇄ English");
@@ -663,11 +787,20 @@ public class MainActivity extends Activity {
         }
         statusView.setText(sb.toString());
 
+        boolean hasOverlay = WatchdogService.hasOverlayPermission(this);
+        boolean hasA11y = isAccessibilityEnabled();
+        boolean hasUsage = hasUsageAccess();
         StringBuilder pb = new StringBuilder(L.t(this, "權限：", "Permissions: "));
-        pb.append(L.t(this, "懸浮窗 ", "Overlay ")).append(WatchdogService.hasOverlayPermission(this) ? "✓" : "✗");
-        pb.append(L.t(this, "／無障礙 ", " / Accessibility ")).append(isAccessibilityEnabled() ? "✓" : "✗");
-        pb.append(L.t(this, "／使用統計 ", " / Usage stats ")).append(hasUsageAccess() ? "✓" : "✗");
+        pb.append(L.t(this, "懸浮窗 ", "Overlay ")).append(hasOverlay ? "✓" : "✗");
+        pb.append(L.t(this, "／無障礙 ", " / Accessibility ")).append(hasA11y ? "✓" : "✗");
+        pb.append(L.t(this, "／使用統計 ", " / Usage stats ")).append(hasUsage ? "✓" : "✗");
         permView.setText(pb.toString());
+        // PERM-1：三顆直達按鈕同步顯示狀態
+        if (permOverlayBtn != null) {
+            permOverlayBtn.setText(L.t(this, "懸浮窗 ", "Overlay ") + (hasOverlay ? "✓" : "✗"));
+            permA11yBtn.setText(L.t(this, "無障礙 ", "Accessibility ") + (hasA11y ? "✓" : "✗"));
+            permUsageBtn.setText(L.t(this, "使用統計 ", "Usage stats ") + (hasUsage ? "✓" : "✗"));
+        }
 
         // 待確認配對區塊（SEC-01）：未綁定且有未過期的配對請求時才顯示
         if (pairingBox != null) {
@@ -685,6 +818,20 @@ public class MainActivity extends Activity {
 
         // 家長模式可能剛開始／結束，解鎖狀態跟著更新（不重建畫面，只切 enabled）
         applyUnlockState();
+    }
+
+    /** TOK-2（v12）：設定頁動作的統一反饋出口。 */
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    /** PERM-1／PAD-2 共用：開啟系統設定頁，裝置無此頁時給反饋而不是靜默。 */
+    private void openSettingsIntent(Intent intent) {
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            toast(L.t(this, "此裝置沒有對應的設定頁", "This device has no such settings page"));
+        }
     }
 
     private boolean isAccessibilityEnabled() {

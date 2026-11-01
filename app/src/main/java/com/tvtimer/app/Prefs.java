@@ -144,6 +144,48 @@ public final class Prefs {
         return sp(c).getLong(K_CHAT_ID, 0L);
     }
 
+    /**
+     * TOK-1（v12）：只讀取 token.txt 的內容（trim 後第一個非空行），不寫入、不刪檔。
+     * 讀不到檔案或內容長度不足時回傳 null。供「重新讀取」按鈕做三態判斷用；
+     * importTokenIfNeeded 的首次匯入行為維持不變。
+     */
+    public static String readTokenFile(Context c) {
+        try {
+            File f = new File(Environment.getExternalStorageDirectory(), "tvtimer/token.txt");
+            if (!f.isFile()) {
+                return null;
+            }
+            BufferedReader r = new BufferedReader(new FileReader(f));
+            try {
+                String s;
+                while ((s = r.readLine()) != null) {
+                    if (!s.trim().isEmpty()) {
+                        String line = s.trim();
+                        return line.length() >= 20 ? line : null;
+                    }
+                }
+            } finally {
+                r.close();
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "readTokenFile failed", e);
+        }
+        return null;
+    }
+
+    /**
+     * TOK-1（v12）：換上新 token（或清除，傳空字串）時的配套重置。
+     * update offset 是 per-bot 的，接續舊值會漏掉新 bot 的待處理更新；
+     * 群組綁定屬於舊 bot，一併清除，狀態列會提示重新配對。
+     */
+    public static void applyTokenChange(Context c, String newToken) {
+        setToken(c, newToken == null ? "" : newToken);
+        setUpdateOffset(c, 0L);
+        setChatId(c, 0);
+        setChatTitle(c, "");
+        clearPendingPairing(c);
+    }
+
     public static void setChatId(Context c, long chatId) {
         sp(c).edit().putLong(K_CHAT_ID, chatId).apply();
     }

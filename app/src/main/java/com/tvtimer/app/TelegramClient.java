@@ -105,6 +105,65 @@ public class TelegramClient {
         return running;
     }
 
+    // ================= token validation (TOK-3, v12) =================
+
+    /** 貼上 token 時的驗證結果回呼（在背景執行緒觸發，UI 自行切回主執行緒）。 */
+    public interface ValidationCallback {
+        void onResult(boolean ok, String username);
+    }
+
+    /**
+     * 以候選 token 呼叫 getMe 驗證真偽，不影響目前 poller 使用的 token。
+     * 成功時回傳 bot 的 username 供家長核對（避免把 A bot 的 token 存成 B bot）。
+     */
+    public static void validateTokenAsync(final String candidate, final ValidationCallback cb) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean ok = false;
+                String username = "";
+                HttpURLConnection conn = null;
+                try {
+                    URL url = new URL(API_BASE + candidate + "/getMe");
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(10_000);
+                    conn.setReadTimeout(15_000);
+                    int code = conn.getResponseCode();
+                    java.io.InputStream is = code >= 200 && code < 300
+                            ? conn.getInputStream() : conn.getErrorStream();
+                    if (is != null) {
+                        BufferedReader r = new BufferedReader(
+                                new InputStreamReader(is, StandardCharsets.UTF_8));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = r.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        r.close();
+                        JSONObject resp = new JSONObject(sb.toString());
+                        if (resp.optBoolean("ok")) {
+                            JSONObject result = resp.optJSONObject("result");
+                            if (result != null) {
+                                username = result.optString("username", "");
+                                ok = !username.isEmpty();
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "validateToken failed", e);
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                }
+                if (cb != null) {
+                    cb.onResult(ok, username);
+                }
+            }
+        }, "tvtimer-tg-validate").start();
+    }
+
     // ================= sending =================
 
     public void sendTextAsync(final long chatId, final String text) {

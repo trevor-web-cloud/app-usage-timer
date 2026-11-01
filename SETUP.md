@@ -90,6 +90,9 @@
    應該看不到 token.txt。若還在或狀態未更新，按 App 裡的「重新讀取 token.txt」再試一次。
    平板（非電視）直接在裝置上匯入時，App 需要「所有檔案存取權」才能讀取該檔案：
    v11 起 App 內有「開啟檔案存取設定（匯入 token 用）」按鈕可直達該設定頁，開啟後再按「重新讀取 token.txt」。
+   v12 起：在平板上可改用 App 內的「貼上 Bot Token」直接貼上（會先驗證並顯示 bot 名稱，成功才儲存）；
+   「重新讀取 token.txt」已改為可覆寫既有 token（換 token 時配對會一併清除，需重新配對）；
+   狀態區下方有懸浮窗／無障礙／使用統計三顆按鈕可直接跳到各自的系統設定頁。
 
 ## 步驟六：在 App 內開通三項權限
 
@@ -259,6 +262,10 @@ First-time setup takes about 20–30 minutes.
    permission so the app can read the file: since v11 the app has an in-app
    "Open file-access settings (for token import)" button that jumps straight to
    that settings page — enable it, then tap "Reload token.txt".
+   Since v12, on a tablet you can instead use "Paste bot token" in the app (it verifies the
+   token and shows the bot name before saving); "Reload token.txt" now overwrites an existing
+   token (pairing is cleared when the token changes — pair again afterwards); and three buttons
+   under the status area jump straight to the Overlay / Accessibility / Usage-stats settings.
 
 ## Step 6 — Grant the three permissions in the app
 
