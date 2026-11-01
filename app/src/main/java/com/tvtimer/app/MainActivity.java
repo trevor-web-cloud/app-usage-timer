@@ -36,9 +36,11 @@ public class MainActivity extends Activity {
     private boolean settingsUnlocked;
     private TextView statusView;
     private TextView permView;
-    private Button permOverlayBtn;
+    private Button permRestrictedBtn;
     private Button permA11yBtn;
     private Button permUsageBtn;
+    private Button permOverlayBtn;
+    private Button permBatteryBtn;
     private LinearLayout settingsBox;
     /** WL-1：觀看清單專用容器（自訂 App 增刪後可單獨重建，不必重開畫面）。 */
     private LinearLayout watchBox;
@@ -98,9 +100,34 @@ public class MainActivity extends Activity {
         permView.setGravity(android.view.Gravity.LEFT);
         col.addView(permView, Ui.rowParams(this));
 
-        // --- PERM-1（v12）：三顆權限直達按鈕（常駐可用，不受設定鎖定影響） ---
-        LinearLayout permRow = new LinearLayout(this);
-        permRow.setOrientation(LinearLayout.HORIZONTAL);
+        // --- PERM-4（v13）：權限開啟順序編號清單（常駐可用，不受設定鎖定影響） ---
+        // 順序有硬相依：①受限制的設定未開，②無障礙會直接遭拒（2026-11-01 平板實證）。
+        LinearLayout permBox = new LinearLayout(this);
+        permBox.setOrientation(LinearLayout.VERTICAL);
+        permRestrictedBtn = Ui.bigButton(this, "");
+        permRestrictedBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAppDetails();
+            }
+        });
+        permBox.addView(permRestrictedBtn, Ui.rowParams(this));
+        permA11yBtn = Ui.bigButton(this, "");
+        permA11yBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsIntent(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+            }
+        });
+        permBox.addView(permA11yBtn, Ui.rowParams(this));
+        permUsageBtn = Ui.bigButton(this, "");
+        permUsageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSettingsIntent(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
+            }
+        });
+        permBox.addView(permUsageBtn, Ui.rowParams(this));
         permOverlayBtn = Ui.bigButton(this, "");
         permOverlayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,24 +136,19 @@ public class MainActivity extends Activity {
                         Uri.parse("package:" + getPackageName())));
             }
         });
-        permRow.addView(permOverlayBtn, Ui.cellParams(this, 1));
-        permA11yBtn = Ui.bigButton(this, "");
-        permA11yBtn.setOnClickListener(new View.OnClickListener() {
+        permBox.addView(permOverlayBtn, Ui.rowParams(this));
+        permBatteryBtn = Ui.bigButton(this, "");
+        permBatteryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openSettingsIntent(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                openBatterySettings();
             }
         });
-        permRow.addView(permA11yBtn, Ui.cellParams(this, 1));
-        permUsageBtn = Ui.bigButton(this, "");
-        permUsageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openSettingsIntent(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-            }
-        });
-        permRow.addView(permUsageBtn, Ui.cellParams(this, 1));
-        col.addView(permRow, Ui.rowParams(this));
+        permBox.addView(permBatteryBtn, Ui.rowParams(this));
+        TextView permHeader = Ui.text(this, L.t(this, "權限設定（依編號順序開啟）", "Permissions (open in numbered order)"), 20, Ui.COLOR_TEXT);
+        permHeader.setGravity(android.view.Gravity.LEFT);
+        col.addView(permHeader, Ui.rowParams(this));
+        col.addView(permBox, Ui.rowParams(this));
 
         // --- PIN 解鎖 ---
         LinearLayout pinRow = new LinearLayout(this);
@@ -247,6 +269,13 @@ public class MainActivity extends Activity {
         settingsBox = new LinearLayout(this);
         settingsBox.setOrientation(LinearLayout.VERTICAL);
         col.addView(settingsBox, Ui.rowParams(this));
+
+        // --- GRP-1（v13）：設定頁群組化，依初次設定進行順序排列（項目稍後移入） ---
+        final LinearLayout grpToken = settingsGroup("步驟一：Bot Token", "Step 1: Bot token");
+        final LinearLayout grpPair = settingsGroup("步驟二：Telegram 配對", "Step 2: Telegram pairing");
+        final LinearLayout grpWatch = settingsGroup("步驟三：限制的 App", "Step 3: Restricted apps");
+        final LinearLayout grpParent = settingsGroup("家長模式", "Parent mode");
+        final LinearLayout grpOther = settingsGroup("其他設定", "Other settings");
 
         // --- 變更 PIN ---
         LinearLayout newPinRow = new LinearLayout(this);
@@ -463,6 +492,13 @@ public class MainActivity extends Activity {
             }
         });
         settingsBox.addView(capBtn, Ui.rowParams(this));
+
+        // --- GRP-1（v13）：把設定項移入群組（建構順序不動，只改歸屬與顯示順序） ---
+        moveToGroup(grpToken, fileAccess, pasteToken, rereadToken, clearToken);
+        moveToGroup(grpPair, clearPairing);
+        moveToGroup(grpWatch, watchBox);
+        moveToGroup(grpParent, parentRow);
+        moveToGroup(grpOther, capBtn, langBtn, newPinRow);
 
         setContentView(scroll);
         applyUnlockState();
@@ -795,11 +831,13 @@ public class MainActivity extends Activity {
         pb.append(L.t(this, "／無障礙 ", " / Accessibility ")).append(hasA11y ? "✓" : "✗");
         pb.append(L.t(this, "／使用統計 ", " / Usage stats ")).append(hasUsage ? "✓" : "✗");
         permView.setText(pb.toString());
-        // PERM-1：三顆直達按鈕同步顯示狀態
-        if (permOverlayBtn != null) {
-            permOverlayBtn.setText(L.t(this, "懸浮窗 ", "Overlay ") + (hasOverlay ? "✓" : "✗"));
-            permA11yBtn.setText(L.t(this, "無障礙 ", "Accessibility ") + (hasA11y ? "✓" : "✗"));
-            permUsageBtn.setText(L.t(this, "使用統計 ", "Usage stats ") + (hasUsage ? "✓" : "✗"));
+        // PERM-4：編號按鈕同步顯示狀態（①為導引鈕，系統無狀態可讀，不顯示 ✓／✗）
+        if (permRestrictedBtn != null) {
+            permRestrictedBtn.setText(L.t(this, "1. 允許受限制的設定（App 資訊頁最下方）", "1. Allow restricted settings (bottom of App info)"));
+            permA11yBtn.setText(L.t(this, "2. 無障礙 ", "2. Accessibility ") + (hasA11y ? "✓" : "✗"));
+            permUsageBtn.setText(L.t(this, "3. 使用統計 ", "3. Usage stats ") + (hasUsage ? "✓" : "✗"));
+            permOverlayBtn.setText(L.t(this, "4. 懸浮窗 ", "4. Overlay ") + (hasOverlay ? "✓" : "✗"));
+            permBatteryBtn.setText(L.t(this, "5. 省電策略 ", "5. Battery policy ") + (isBatteryUnrestricted() ? "✓" : "✗"));
         }
 
         // 待確認配對區塊（SEC-01）：未綁定且有未過期的配對請求時才顯示
@@ -820,9 +858,67 @@ public class MainActivity extends Activity {
         applyUnlockState();
     }
 
+    /** GRP-1（v13）：在 settingsBox 內建一個帶標題的群組容器並回傳。 */
+    private LinearLayout settingsGroup(String zh, String en) {
+        LinearLayout g = new LinearLayout(this);
+        g.setOrientation(LinearLayout.VERTICAL);
+        TextView h = Ui.text(this, L.t(this, zh, en), 20, Ui.COLOR_TEXT);
+        h.setGravity(android.view.Gravity.LEFT);
+        h.setPadding(0, 36, 0, 6);
+        g.addView(h, Ui.rowParams(this));
+        settingsBox.addView(g, Ui.rowParams(this));
+        return g;
+    }
+
+    /** GRP-1（v13）：把已建好的 View 從原父容器移入指定群組（保留原點擊邏輯）。 */
+    private void moveToGroup(LinearLayout group, View... views) {
+        for (View v : views) {
+            if (v.getParent() instanceof LinearLayout) {
+                ((LinearLayout) v.getParent()).removeView(v);
+            }
+            group.addView(v, Ui.rowParams(this));
+        }
+    }
+
     /** TOK-2（v12）：設定頁動作的統一反饋出口。 */
     private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    /** PERM-2（v13）：直達本 App 資訊頁（「允許受限制的設定」與「省電策略」列都在這頁）。 */
+    private void openAppDetails() {
+        openSettingsIntent(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:" + getPackageName())));
+    }
+
+    /** PERM-3（v13）：省電策略入口——先請求電池最佳化豁免，逐層 fallback 到 App 資訊頁。 */
+    private void openBatterySettings() {
+        if (isBatteryUnrestricted()) {
+            // 已豁免：仍帶到 App 資訊頁，讓家長核對 HyperOS 自己的省電策略列
+            openAppDetails();
+            return;
+        }
+        try {
+            startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:" + getPackageName())));
+        } catch (Exception e) {
+            try {
+                startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS));
+            } catch (Exception e2) {
+                openAppDetails();
+            }
+        }
+    }
+
+    /** 系統電池最佳化豁免狀態（HyperOS 另有自家省電策略，以 App 資訊頁該列為最終準據）。 */
+    private boolean isBatteryUnrestricted() {
+        try {
+            android.os.PowerManager pm =
+                    (android.os.PowerManager) getSystemService(POWER_SERVICE);
+            return pm != null && pm.isIgnoringBatteryOptimizations(getPackageName());
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /** PERM-1／PAD-2 共用：開啟系統設定頁，裝置無此頁時給反饋而不是靜默。 */

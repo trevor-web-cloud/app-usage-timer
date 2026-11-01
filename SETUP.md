@@ -94,16 +94,19 @@
    「重新讀取 token.txt」已改為可覆寫既有 token（換 token 時配對會一併清除，需重新配對）；
    狀態區下方有懸浮窗／無障礙／使用統計三顆按鈕可直接跳到各自的系統設定頁。
 
-## 步驟六：在 App 內開通三項權限
+## 步驟六：在 App 內依編號開通權限
 
-打開電視上的「看電視計時」，狀態區會列出三項權限，每項都有按鈕直達對應的系統設定頁，
-依序開通（這三項是看門狗運作的必要條件）：
+打開「看電視計時」，狀態區下方有「權限設定」編號清單（v13 起），照編號 1 到 5 依序開通：
 
-1. **在其他應用程式上層顯示（懸浮窗）**：允許 TV Timer。
-2. **無障礙服務**：在「已安裝的應用程式」裡找到 TV Timer，開啟並確認警告。
+1. **允許受限制的設定**：按鈕直達 App 資訊頁，在小米／HyperOS 平板上要捲到最下方「進階設定」開啟
+   （這步沒開，第 2 步的無障礙會直接遭拒；電視與原生 Android 可能不需要此步，找不到就跳過）。
+2. **無障礙服務**：在「下載的應用程式／已安裝的應用程式」裡找到 TV Timer，開啟並確認 10 秒倒數警告。
 3. **使用情況存取權**：允許 TV Timer 存取使用情況。
+4. **在其他應用程式上層顯示（懸浮窗）**：允許 TV Timer。
+5. **省電策略**：設為無限制（小米／HyperOS 另在 App 資訊頁的「省電策略」列確認顯示無限制），
+   避免看門狗被系統凍結。
 
-三項都顯示 ✓ 才算完成。
+2–5 都顯示 ✓ 才算完成。
 
 ## 步驟七：設定家長 PIN
 
@@ -267,16 +270,22 @@ First-time setup takes about 20–30 minutes.
    token (pairing is cleared when the token changes — pair again afterwards); and three buttons
    under the status area jump straight to the Overlay / Accessibility / Usage-stats settings.
 
-## Step 6 — Grant the three permissions in the app
+## Step 6 — Grant the permissions in the app, in numbered order
 
-Open TV Timer on the TV. Its status area lists three permissions, each with a button
-that jumps to the right system page. Grant all three (the watchdog needs them to work):
+Open TV Timer. Below the status area there is a numbered "Permissions" list (since v13).
+Work through it in order, 1 to 5:
 
-1. **Display over other apps (overlay)** — allow TV Timer.
-2. **Accessibility service** — under "Installed apps", find TV Timer, turn it on, accept the warning.
+1. **Allow restricted settings** — the button jumps to the App info page; on Xiaomi/HyperOS
+   tablets scroll to the bottom ("Advanced settings") and turn it on. Without this step,
+   step 2 is rejected outright. (TVs and stock Android may not need it — skip if absent.)
+2. **Accessibility service** — under "Downloaded apps / Installed apps", find TV Timer,
+   turn it on and accept the 10-second countdown warning.
 3. **Usage access** — allow TV Timer.
+4. **Display over other apps (overlay)** — allow TV Timer.
+5. **Battery policy** — set to unrestricted (on Xiaomi/HyperOS also confirm the "Battery
+   saver" row on the App info page shows No restrictions), so the watchdog is not frozen.
 
-All three should show ✓.
+Steps 2–5 should all show ✓.
 
 ## Step 7 — Set the parent PIN
 
