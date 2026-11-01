@@ -955,9 +955,16 @@ public class MainActivity extends Activity {
         pb.append(L.t(this, "／無障礙 ", " / Accessibility ")).append(hasA11y ? "✓" : "✗");
         pb.append(L.t(this, "／使用統計 ", " / Usage stats ")).append(hasUsage ? "✓" : "✗");
         permView.setText(pb.toString());
-        // PERM-4：編號按鈕同步顯示狀態（①為導引鈕，系統無狀態可讀，不顯示 ✓／✗）
+        // PERM-4／PERM-6：編號按鈕同步顯示狀態。①無直接可讀狀態，但無障礙能啟用
+        // 必以①已授權為前提（HyperOS 實證），故以 hasA11y 推斷：成立→比照 PERM-5
+        // 標「✓ 已開啟」＋淡化；不成立→維持導引標籤、不標 ✗（避免誤判未授權）。
         if (permRestrictedBtn != null) {
-            permRestrictedBtn.setText(L.t(this, "1. 允許受限制的設定（App 資訊頁最下方）", "1. Allow restricted settings (bottom of App info)"));
+            if (hasA11y) {
+                setPermState(permRestrictedBtn, "1. 允許受限制的設定 ", "1. Restricted settings ", true);
+            } else {
+                permRestrictedBtn.setText(L.t(this, "1. 允許受限制的設定（App 資訊頁最下方）", "1. Allow restricted settings (bottom of App info)"));
+                permRestrictedBtn.setAlpha(1.0f);
+            }
             setPermState(permA11yBtn, "2. 無障礙 ", "2. Accessibility ", hasA11y);
             setPermState(permUsageBtn, "3. 使用統計 ", "3. Usage stats ", hasUsage);
             setPermState(permOverlayBtn, "4. 懸浮窗 ", "4. Overlay ", hasOverlay);

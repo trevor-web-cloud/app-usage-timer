@@ -3,7 +3,7 @@
 為 Chromecast with Google TV 4K 自製的兒童看電視計時系統：一個常駐背景的「看門狗」App，
 監看觀看類 App 的使用時間；家長用自己的 Telegram bot 在手機上收回報、遠端加時與核准。
 
-**目前版本：v14（versionCode 15 / 1.12-v14，修訂版二）** ｜ 專案網頁：https://trevor-web-cloud.github.io/app-usage-timer/
+**目前版本：v14（versionCode 16 / 1.12-v14，修訂版三）** ｜ 專案網頁：https://trevor-web-cloud.github.io/app-usage-timer/
 
 📥 **直接下載 APK 安裝**：[Releases 頁](https://github.com/trevor-web-cloud/app-usage-timer/releases)（不需自行編譯）
 📖 **詳細安裝教學**（建機器人、取得 token、配對、權限、疑難排解）：[SETUP.md](SETUP.md)
@@ -62,7 +62,7 @@ A homemade screen-time system for kids on Chromecast with Google TV 4K: a reside
 "watchdog" app that times viewing apps, while parents receive reports and grant
 approvals from their phones through their own Telegram bot.
 
-**Current version: v14 (versionCode 15 / 1.12-v14, revision 2)** ｜ Project page: https://trevor-web-cloud.github.io/app-usage-timer/
+**Current version: v14 (versionCode 16 / 1.12-v14, revision 3)** ｜ Project page: https://trevor-web-cloud.github.io/app-usage-timer/
 
 📥 **Download the ready-made APK**: [Releases](https://github.com/trevor-web-cloud/app-usage-timer/releases) (no build needed)
 📖 **Detailed setup guide** (bot creation, token, pairing, permissions, troubleshooting): [SETUP.md](SETUP.md)

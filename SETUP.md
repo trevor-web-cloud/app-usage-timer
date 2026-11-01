@@ -132,7 +132,9 @@
 5. **省電策略**：設為無限制（小米／HyperOS 另在 App 資訊頁的「省電策略」列確認顯示無限制），
    避免看門狗被系統凍結。
 
-2–5 都顯示 ✓ 才算完成。
+2–5 都顯示 ✓ 才算完成。已開啟的按鈕會改標「✓ 已開啟」並淡化（不消失，仍可點入複查）；
+第 1 顆沒有可讀狀態，改以第 2 步推斷：第 2 步 ✓ 後，第 1 顆同步顯示「✓ 已開啟」並淡化
+（HyperOS 在授權後會自動隱藏 App 資訊頁裡的那一列，看不到開關是正常的）。
 
 ## 步驟七：設定家長 PIN
 
@@ -347,7 +349,10 @@ Work through it in order, 1 to 5:
 5. **Battery policy** — set to unrestricted (on Xiaomi/HyperOS also confirm the "Battery
    saver" row on the App info page shows No restrictions), so the watchdog is not frozen.
 
-Steps 2–5 should all show ✓.
+Steps 2–5 should all show ✓. Granted buttons stay visible, switch to "✓ enabled" and
+dim (still tappable for re-checking). Button 1 exposes no readable state, so it is
+inferred from step 2: once step 2 shows ✓, button 1 also shows "✓ enabled" and dims
+(on HyperOS the App-info row itself disappears after you grant it — that's normal).
 
 ## Step 7 — Set the parent PIN
 
