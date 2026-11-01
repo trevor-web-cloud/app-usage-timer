@@ -59,6 +59,9 @@
 1. 到本專案的 Releases 頁下載最新版 APK：
    https://github.com/trevor-web-cloud/app-usage-timer/releases
    （檔名類似 `tvtimer-v14.apk`）
+   在電視上改用 Downloader 直接下載也可以（免電腦、免 ADB）：在 Downloader 輸入短網址
+   https://bit.ly/4yZrB8b 會轉址到 v14 的 APK 直達連結，遙控器比較好打；
+   之後換版本時短網址需重新產生，Releases 頁的連結永遠有效。
 2. 下載 Google 官方的 platform-tools（裡面有 `adb.exe`）：
    https://developer.android.com/tools/releases/platform-tools
    選 Windows 版，解壓縮到一個固定位置，例如 `D:\platform-tools`。
@@ -261,6 +264,10 @@ First-time setup takes about 20–30 minutes.
 
 1. Download the latest APK from this project's Releases page:
    https://github.com/trevor-web-cloud/app-usage-timer/releases (file name like `tvtimer-v14.apk`)
+   On the TV itself, you can also use the Downloader app (no PC, no ADB): enter the short
+   URL https://bit.ly/4yZrB8b in Downloader — it redirects to the v14 APK direct link and
+   is much easier to type with a remote. The short URL must be regenerated for each new
+   version; the Releases page link always works.
 2. Download Google's official platform-tools (contains `adb.exe`):
    https://developer.android.com/tools/releases/platform-tools
    Get the Windows version and unzip it to a fixed place, e.g. `D:\platform-tools`.
