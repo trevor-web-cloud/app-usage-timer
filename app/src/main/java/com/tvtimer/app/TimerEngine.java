@@ -45,6 +45,8 @@ public class TimerEngine {
     private static final long HEARTBEAT_FRESH_MS = 15_000L;
     /** FG-5：計時中前台訊號遺失的回復寬限；寬限內視為仍在計時，逾時才轉暫停。 */
     private static final long FG_LOSS_GRACE_MS = 10_000L;
+    /** PIP-1（v11）：無障礙視窗掃描約每秒一次，「觀看 App 視窗可見」訊號的新鮮窗口。 */
+    private static final long VISIBLE_FRESH_MS = 4_000L;
     /** RB-1：換日歸零的時鐘信任窗——init 後須經過此時間（開機網路校時通常已完成）才允許換日。 */
     private static final long ROLLOVER_TRUST_MS = 45_000L;
     /** 我們自己呼叫 goHome() 後，短時間內忽略「launcher 成為前台」以免把剛顯示的 gate 又關掉。 */
@@ -124,6 +126,8 @@ public class TimerEngine {
         public String dbgFgPkg;
         public boolean dbgShouldCount;
         public long dbgHeartbeatAgeSec = -1;
+        /** PIP-1 診斷欄位：session App 視窗最後一次被掃描為可見的距今秒數；-1 = 未曾可見。 */
+        public long dbgVisibleAgeSec = -1;
     }
 
     private final Context ctx;
@@ -236,6 +240,14 @@ public class TimerEngine {
         lastWatchConfirmElapsed = -1;
     }
 
+    /** PIP-1（v11）：session 觀看 App 最後一次被無障礙視窗掃描確認「視窗可見」的 elapsed 時間；-1 = 未曾確認。 */
+    private long lastWatchVisibleElapsed = -1;
+
+    /** PIP-1（v11）：WatchdogService 掃描到 session App 的 PiP／分割畫面視窗仍可見時呼叫。 */
+    public void noteWatchVisible() {
+        lastWatchVisibleElapsed = SystemClock.elapsedRealtime();
+    }
+
     public Snapshot snapshot() {
         Snapshot s = new Snapshot();
         s.hasToken = hasToken();
@@ -256,6 +268,8 @@ public class TimerEngine {
         s.dbgShouldCount = lastShouldCount;
         s.dbgHeartbeatAgeSec = lastWatchConfirmElapsed < 0 ? -1
                 : (SystemClock.elapsedRealtime() - lastWatchConfirmElapsed) / 1000L;
+        s.dbgVisibleAgeSec = lastWatchVisibleElapsed < 0 ? -1
+                : (SystemClock.elapsedRealtime() - lastWatchVisibleElapsed) / 1000L;
         return s;
     }
 
@@ -279,6 +293,16 @@ public class TimerEngine {
                 return "設定";
             case "com.android.vending":
                 return "Play 商店";
+            case "com.miui.securitycenter":
+                return "安全中心";
+            case "com.miui.packageinstaller":
+                return "安裝器";
+            case "com.xiaomi.market":
+                return "小米應用商店";
+            case "com.sec.android.app.samsungapps":
+                return "Galaxy Store";
+            case "com.huawei.appmarket":
+                return "華為應用市場";
             default:
                 return pkg;
         }
@@ -330,7 +354,15 @@ public class TimerEngine {
                 || pkg.equals("com.android.settings")
                 || pkg.equals("com.android.vending")
                 || pkg.equals("com.android.packageinstaller")
-                || pkg.equals("com.google.android.packageinstaller")) {
+                || pkg.equals("com.google.android.packageinstaller")
+                // BLK-PAD-1（v11）：平板品牌系統管理入口與安裝繞道
+                // 小米安全中心內含應用管理（可停用／解除安裝 App）、小米安裝器、
+                // 各品牌自家應用商店（可繞過 Play 商店封鎖裝新 App）
+                || pkg.equals("com.miui.securitycenter")
+                || pkg.equals("com.miui.packageinstaller")
+                || pkg.equals("com.xiaomi.market")
+                || pkg.equals("com.sec.android.app.samsungapps")
+                || pkg.equals("com.huawei.appmarket")) {
             return true;
         }
         // 自己的 MainActivity 在鎖定狀態下也要先過 PIN（避免小孩改設定）
@@ -409,13 +441,20 @@ public class TimerEngine {
                 && isWatchingApp(sessionPkg)
                 && lastWatchConfirmElapsed > 0
                 && nowEl - lastWatchConfirmElapsed <= HEARTBEAT_FRESH_MS;
+        // PIP-1（v11）：平板子母畫面（PiP）／分割畫面時，session App 不在前台
+        // 但視窗仍可見、影片續播；WatchdogService 以無障礙視窗掃描餵入可見訊號，
+        // 新鮮窗口內視為仍在觀看，避免「小窗續播、計時暫停」的繞過路徑。
+        boolean visibleFresh = sessionPkg != null && !sessionPkg.isEmpty()
+                && isWatchingApp(sessionPkg)
+                && lastWatchVisibleElapsed > 0
+                && nowEl - lastWatchVisibleElapsed <= VISIBLE_FRESH_MS;
         // FG-5 回復寬限：計時中遇到短暫前台閃爍（實測播放開始時 launcherx 視窗
         // 事件會閃入約數百 ms 至數秒），寬限內不立刻暫停；訊號（fg 或心跳）在
         // 寬限內回復就無縫續計，逾時才認定真的離開、轉暫停並要求續看確認。
-        boolean inGrace = wasCounting && !fgWatch && !heartbeatFresh
+        boolean inGrace = wasCounting && !fgWatch && !heartbeatFresh && !visibleFresh
                 && fgLostSinceElapsed > 0
                 && nowEl - fgLostSinceElapsed <= FG_LOSS_GRACE_MS;
-        boolean shouldCount = (fgWatch || heartbeatFresh || inGrace) && !needsResume;
+        boolean shouldCount = (fgWatch || heartbeatFresh || visibleFresh || inGrace) && !needsResume;
         lastShouldCount = shouldCount;
         if (shouldCount) {
             if (lastTickAnchor < 0) {

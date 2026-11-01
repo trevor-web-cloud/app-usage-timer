@@ -88,6 +88,8 @@
    .\adb shell ls /sdcard/tvtimer/
    ```
    應該看不到 token.txt。若還在或狀態未更新，按 App 裡的「重新讀取 token.txt」再試一次。
+   平板（非電視）直接在裝置上匯入時，App 需要「所有檔案存取權」才能讀取該檔案：
+   v11 起 App 內有「開啟檔案存取設定（匯入 token 用）」按鈕可直達該設定頁，開啟後再按「重新讀取 token.txt」。
 
 ## 步驟六：在 App 內開通三項權限
 
@@ -253,6 +255,10 @@ First-time setup takes about 20–30 minutes.
    .\adb shell ls /sdcard/tvtimer/
    ```
    token.txt should be gone. If it is still there, use the app's "Reload token.txt" button.
+   On a tablet (not a TV), importing on-device requires the "All files access"
+   permission so the app can read the file: since v11 the app has an in-app
+   "Open file-access settings (for token import)" button that jumps straight to
+   that settings page — enable it, then tap "Reload token.txt".
 
 ## Step 6 — Grant the three permissions in the app
 

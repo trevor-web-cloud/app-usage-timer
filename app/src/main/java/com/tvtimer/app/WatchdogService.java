@@ -259,6 +259,12 @@ public class WatchdogService extends Service implements TimerEngine.Events, Tele
                         engine.clearForegroundHeartbeat();
                     }
                 }
+                // PIP-1（v11）：PiP／分割畫面下 session App 不在前台，UsageStats
+                // 也未必有新事件；改以無障礙視窗掃描確認「視窗還在畫面上」
+                TvAccessibilityService a11y = TvAccessibilityService.getInstance();
+                if (a11y != null && a11y.isPkgWindowVisible(s.sessionPkg)) {
+                    engine.noteWatchVisible();
+                }
             }
         } catch (Exception ignored) {
             // 沒有 usage access 時 queryEvents 會回空／丟例外，略過即可

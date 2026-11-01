@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -258,6 +259,17 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 sendServiceAction(WatchdogService.ACTION_PARENT_OFF);
+                // PAD-1（v11）：結束家長模式後自動回主畫面並關閉設定頁，
+                // 避免畫面停留在已解鎖的設定頁讓小孩接手操作
+                Intent home = new Intent(Intent.ACTION_MAIN);
+                home.addCategory(Intent.CATEGORY_HOME);
+                home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    startActivity(home);
+                } catch (Exception ignored) {
+                    // 找不到 HOME 時至少關閉本頁
+                }
+                finish();
             }
         });
         parentRow.addView(parentOff, Ui.cellParams(this, 1));
@@ -286,6 +298,26 @@ public class MainActivity extends Activity {
             }
         });
         settingsBox.addView(rereadToken, Ui.rowParams(this));
+
+        // --- PAD-2（v11）：直達「所有檔案存取權」設定頁（平板裝機時此頁深埋難找） ---
+        Button fileAccess = Ui.bigButton(this, L.t(this, "開啟檔案存取設定（匯入 token 用）", "Open file-access settings (for token import)"));
+        fileAccess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent i = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                            Uri.parse("package:" + getPackageName()));
+                    startActivity(i);
+                } catch (Exception e) {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+                    } catch (Exception ignored) {
+                        // 此裝置無對應設定頁時靜默（電視端以 ADB appops 給權限）
+                    }
+                }
+            }
+        });
+        settingsBox.addView(fileAccess, Ui.rowParams(this));
 
         // --- v6：介面語言切換（按鈕文字雙語並列，不經 L.t） ---
         Button langBtn = Ui.bigButton(this, "介面語言 / Language：中文 ⇄ English");
