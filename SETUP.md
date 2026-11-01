@@ -5,6 +5,18 @@
 
 > English guide below the Chinese section.
 
+## 流程總覽（先看這三步，細節在下面各步驟）
+
+1. **建立 Telegram 機器人、設定權限、取得 token**（步驟一、二）
+   在 BotFather 建 bot；先把 Group Privacy 關掉（必須在加進群組之前）、Allow Groups
+   保持開啟；取得 token 並妥善保存。**每台裝置各建一隻 bot**，電視與平板不共用。
+2. **把 token 寫入裝置——電視與平板方法不同**（步驟三～五）
+   先把 APK 裝上裝置，再寫入 token：電視用「用手機設定 Token」（手機網頁輸入）、
+   平板用「貼上 Bot Token」；兩者也都能用 token.txt 檔案法（重新讀取／首次自動匯入）。
+3. **開通其他系統權限**（步驟六～八）
+   在 App 內依編號開通：受限制的設定 → 無障礙 → 使用統計 → 懸浮窗 → 省電策略；
+   再設定家長 PIN、選取要管制的 App，最後建立家長群組並完成配對。
+
 ## 事前準備
 
 - Chromecast with Google TV 4K（插在電視上、已連上家裡 Wi-Fi）
@@ -190,6 +202,21 @@
 Step by step: create a Telegram bot → get its token → install the APK on the TV →
 import the token → grant three permissions → set a PIN → create the parents' group and pair.
 First-time setup takes about 20–30 minutes.
+
+## Overview (the whole flow in three steps; details in the steps below)
+
+1. **Create the Telegram bot, set its permissions, get the token** (Steps 1–2)
+   Create the bot in BotFather; turn Group Privacy off (must be done BEFORE the bot
+   joins a group) and keep Allow Groups on; save the token. **Create a separate bot
+   for each device** — the TV and the tablet must not share one.
+2. **Write the token into the device — the method differs for TV and tablet** (Steps 3–5)
+   Install the APK on the device first, then write the token: on a TV use
+   "Set token from phone" (one-time web page); on a tablet use "Paste bot token";
+   both also accept the token.txt file method (re-read, or auto-import on first launch).
+3. **Grant the other system permissions** (Steps 6–8)
+   In the app, in numbered order: restricted settings → accessibility → usage access
+   → overlay → battery unrestricted; then set the parent PIN, pick the apps to
+   control, and finally create the parents' group and pair it.
 
 ## What you need
 
