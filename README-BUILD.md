@@ -1,4 +1,4 @@
-# 看電視計時 App（com.tvtimer.app）— 建置與安裝手冊
+# 應用程式使用計時 App Usage Timer（com.tvtimer.app）— 建置與安裝手冊
 
 依規格 v1（2026-10-29 核准）實作的 Android TV 看門狗 App。
 純 Java、只用 Android framework API（**無 AndroidX、無任何外部函式庫**），
@@ -155,7 +155,7 @@ adb shell pm grant com.tvtimer.app android.permission.POST_NOTIFICATIONS
 adb shell settings get secure enabled_accessibility_services
 adb shell appops get com.tvtimer.app
 ```
-App 設定頁（主畫面上的「看電視計時」）也會即時顯示三項權限的 ✓／✗。
+App 設定頁（主畫面上的「應用程式使用計時」）也會即時顯示三項權限的 ✓／✗。
 
 ## Bot token 傳入（provisioning）
 
