@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.InputType;
 import android.view.View;
@@ -44,6 +45,10 @@ public class MainActivity extends Activity {
     private Button permOverlayBtn;
     private Button permBatteryBtn;
     private Button devBtn;
+    /** IDLE-1（v14 修訂二）：頁面無互動逾 3 分鐘自動進入家長模式。 */
+    private static final long IDLE_PARENT_MS = 3 * 60 * 1000L;
+    private long lastInteractElapsed;
+    private boolean idleParentArmed = true;
     private LinearLayout settingsBox;
     /** WL-1：觀看清單專用容器（自訂 App 增刪後可單獨重建，不必重開畫面）。 */
     private LinearLayout watchBox;
@@ -60,6 +65,7 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             refreshStatus();
+            maybeIdleAutoParent();
             ui.postDelayed(this, 2_000);
         }
     };
@@ -75,7 +81,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        lastInteractElapsed = SystemClock.elapsedRealtime();
         ui.post(refresher);
+    }
+
+    /** IDLE-1：任何觸控／按鍵互動都重設閒置計時並重新待命。 */
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        lastInteractElapsed = SystemClock.elapsedRealtime();
+        idleParentArmed = true;
     }
 
     @Override
@@ -107,6 +122,11 @@ public class MainActivity extends Activity {
         TextView title = Ui.text(this, L.t(this, "應用程式使用計時", "App Usage Timer"), 34, Ui.COLOR_TEXT);
         title.setGravity(android.view.Gravity.LEFT);
         col.addView(title, Ui.rowParams(this));
+
+        // VER-1（v14 修訂二）：執行頁標註版本號（執行期讀 PackageManager，與實際 APK 永遠一致）
+        TextView versionView = Ui.text(this, appVersionLabel(), 16, Ui.COLOR_TEXT_DIM);
+        versionView.setGravity(android.view.Gravity.LEFT);
+        col.addView(versionView, Ui.rowParams(this));
 
         statusView = Ui.text(this, "", 22, Ui.COLOR_TEXT);
         statusView.setGravity(android.view.Gravity.LEFT);
@@ -831,6 +851,54 @@ public class MainActivity extends Activity {
 
     // ================= status =================
 
+    /** VER-1：版本標籤（versionName + versionCode，執行期讀取，不寫死）。 */
+    private String appVersionLabel() {
+        String name = "?";
+        long code = -1;
+        try {
+            android.content.pm.PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+            name = pi.versionName;
+            code = pi.getLongVersionCode();
+        } catch (Exception ignored) {
+        }
+        return L.t(this, "版本 ", "Version ") + name + " · versionCode " + code;
+    }
+
+    /**
+     * PERM-5（v14 修訂二）：權限已開啟的按鈕不消失——標「✓ 已開啟」並淡化（alpha 0.55），
+     * 仍可點擊重進設定頁複查；權限被系統收回時，下一次 refresh 自動恢復 ✗ 與不透明。
+     */
+    private void setPermState(Button b, String zh, String en, boolean granted) {
+        if (b == null) {
+            return;
+        }
+        b.setText(L.t(this, zh, en) + (granted ? L.t(this, "✓ 已開啟", "✓ enabled") : "✗"));
+        b.setAlpha(granted ? 0.55f : 1.0f);
+    }
+
+    /**
+     * IDLE-1（v14 修訂二）：本頁前景開啟且無任何互動逾 3 分鐘、已設定 token、
+     * 且不在家長模式時，自動進入家長模式（與手按「進入家長模式」同一路徑）。
+     * 每段閒置只觸發一次；任何互動重新待命。
+     */
+    private void maybeIdleAutoParent() {
+        if (!idleParentArmed) {
+            return;
+        }
+        if (Prefs.getToken(this).isEmpty()) {
+            return;
+        }
+        if (Prefs.getParentDeadlineWall(this) > System.currentTimeMillis()) {
+            return;
+        }
+        if (SystemClock.elapsedRealtime() - lastInteractElapsed < IDLE_PARENT_MS) {
+            return;
+        }
+        idleParentArmed = false;
+        sendServiceAction(WatchdogService.ACTION_PARENT_ON);
+        toast(L.t(this, "閒置逾 3 分鐘，已自動進入家長模式", "Idle over 3 minutes: parent mode turned on automatically"));
+    }
+
     private void refreshStatus() {
         if (statusView == null) {
             return;
@@ -890,10 +958,10 @@ public class MainActivity extends Activity {
         // PERM-4：編號按鈕同步顯示狀態（①為導引鈕，系統無狀態可讀，不顯示 ✓／✗）
         if (permRestrictedBtn != null) {
             permRestrictedBtn.setText(L.t(this, "1. 允許受限制的設定（App 資訊頁最下方）", "1. Allow restricted settings (bottom of App info)"));
-            permA11yBtn.setText(L.t(this, "2. 無障礙 ", "2. Accessibility ") + (hasA11y ? "✓" : "✗"));
-            permUsageBtn.setText(L.t(this, "3. 使用統計 ", "3. Usage stats ") + (hasUsage ? "✓" : "✗"));
-            permOverlayBtn.setText(L.t(this, "4. 懸浮窗 ", "4. Overlay ") + (hasOverlay ? "✓" : "✗"));
-            permBatteryBtn.setText(L.t(this, "5. 省電策略 ", "5. Battery policy ") + (isBatteryUnrestricted() ? "✓" : "✗"));
+            setPermState(permA11yBtn, "2. 無障礙 ", "2. Accessibility ", hasA11y);
+            setPermState(permUsageBtn, "3. 使用統計 ", "3. Usage stats ", hasUsage);
+            setPermState(permOverlayBtn, "4. 懸浮窗 ", "4. Overlay ", hasOverlay);
+            setPermState(permBatteryBtn, "5. 省電策略 ", "5. Battery policy ", isBatteryUnrestricted());
         }
         // DEV-1：開發人員選項狀態同步（按鈕在「其他設定」群組）
         if (devBtn != null) {
